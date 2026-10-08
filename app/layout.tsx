@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Kanit, Press_Start_2P, Share_Tech_Mono } from 'next/font/google'
 import './globals.css'
+import { assetPath, LOCAL_MODE } from '@/lib/deployment'
 
 const kanit = Kanit({
   subsets: ['thai', 'latin'],
@@ -27,25 +28,25 @@ const headingFont = Press_Start_2P({
 })
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
+  title: 'Database City — เกมนักสืบฐานข้อมูล',
+  description: 'เรียนรู้ฐานข้อมูลผ่านภารกิจนักสืบ 16 สัปดาห์',
   generator: 'v0.app',
   icons: {
     icon: [
       {
-        url: '/icon-light-32x32.png',
+        url: assetPath('/icon-light-32x32.png'),
         media: '(prefers-color-scheme: light)',
       },
       {
-        url: '/icon-dark-32x32.png',
+        url: assetPath('/icon-dark-32x32.png'),
         media: '(prefers-color-scheme: dark)',
       },
       {
-        url: '/icon.svg',
+        url: assetPath('/icon.svg'),
         type: 'image/svg+xml',
       },
     ],
-    apple: '/apple-icon.png',
+    apple: assetPath('/apple-icon.png'),
   },
 }
 
@@ -66,7 +67,7 @@ export default function RootLayout({
     <html lang="th" className={`${kanit.variable} ${shareTechMono.variable} ${headingFont.variable}`}>
       <body className="antialiased">
         {children}
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        {process.env.NODE_ENV === 'production' && !LOCAL_MODE && <Analytics />}
       </body>
     </html>
   )

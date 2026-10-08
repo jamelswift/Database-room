@@ -180,7 +180,7 @@ h4.font-retro {
 }
 
 .world-atlas {
-  background: linear-gradient(#15233230, #15233230), #78848c url('/database-london-atlas.png') center / 100% 100% no-repeat;
+  background: linear-gradient(#15233230, #15233230), #78848c var(--database-map-bg) center / 100% 100% no-repeat;
   border: 5px solid #6e716c;
   border-radius: 12px;
   box-shadow: 0 22px 65px #0009, 0 0 0 2px #b9a17a, inset 0 0 65px #15233266;

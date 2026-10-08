@@ -1,0 +1,71 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const Module = require('node:module');
+const assert = require('node:assert/strict');
+const { webcrypto } = require('node:crypto');
+const ts = require('typescript');
+const root = path.resolve(__dirname, '..');
+const cache = new Map();
+const storage = () => {
+  const map = new Map();
+  return { getItem: key => map.get(key) ?? null, setItem: (key, value) => map.set(key, String(value)), removeItem: key => map.delete(key), clear: () => map.clear() };
+};
+global.localStorage = storage();
+global.sessionStorage = storage();
+global.crypto = webcrypto;
+let queue = Promise.resolve();
+Object.defineProperty(global, 'navigator', { configurable: true, value: { locks: { request: (_key, task) => { const result = queue.then(task); queue = result.catch(() => {}); return result; } } } });
+function load(file) {
+  file = path.resolve(file);
+  if (cache.has(file)) return cache.get(file).exports;
+  const module = new Module(file);
+  cache.set(file, module);
+  module.filename = file;
+  module.paths = Module._nodeModulePaths(path.dirname(file));
+  const original = module.require.bind(module);
+  module.require = name => {
+    const target = name.startsWith('@/') ? path.join(root, name.slice(2)) : name.startsWith('.') ? path.resolve(path.dirname(file), name) : null;
+    return target && fs.existsSync(target + '.ts') ? load(target + '.ts') : original(name);
+  };
+  module._compile(ts.transpileModule(fs.readFileSync(file, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText, file);
+  return module.exports;
+}
+(async () => {
+  const { localGameRequest: api } = load(path.join(root, 'lib/local-game-store.ts'));
+  assert.equal((await api()).player, null);
+  const registered = await api({ action: 'register', username: 'Test.Student', password: 'test-password', name: 'นักสืบทดสอบ' });
+  assert.equal(registered.player.username, 'test.student');
+  assert.equal(registered.player.password, undefined);
+  assert.ok(!localStorage.getItem('database-city-local-v1:').includes('test-password'));
+  await assert.rejects(api({ action: 'register', username: 'test.student', password: 'p', name: 'duplicate' }), error => error.status === 409);
+  const player = registered.player;
+  player.completedLevels = [1];
+  player.answerStats = { correct: 2, incorrect: 1 };
+  player.weeklyScores = { 1: { correct: 2, incorrect: 1 } };
+  player.character.hat = 'cap';
+  assert.equal((await api({ action: 'save', player, revision: 0 })).revision, 1);
+  // Reload all modules to simulate a new page using the same browser storage.
+  cache.clear();
+  const { localGameRequest: reloaded } = load(path.join(root, 'lib/local-game-store.ts'));
+  assert.equal((await reloaded()).player.xp, 100);
+  assert.equal((await reloaded()).player.character.hat, 'cap');
+  assert.deepEqual((await reloaded()).player.weeklyScores, player.weeklyScores);
+  await assert.rejects(reloaded({ action: 'save', player, revision: 0 }), error => error.status === 409);
+  await assert.rejects(reloaded({ action: 'save', player: { ...player, weeklyScores: {} }, revision: 1 }));
+  await reloaded({ action: 'logout' });
+  assert.equal((await reloaded()).player, null);
+  await assert.rejects(reloaded({ action: 'login', username: 'test.student', password: 'wrong' }), error => error.status === 401);
+  assert.equal((await reloaded({ action: 'login', username: 'test.student', password: 'test-password' })).player.revision, 1);
+  await reloaded({ action: 'register', username: 'second', name: 'Second', password: 'second-password' });
+  assert.equal((await reloaded()).accounts.length, 2);
+  const concurrent = await Promise.allSettled([reloaded({ action: 'register', username: 'third', name: 'Third', password: 'p' }), reloaded({ action: 'register', username: 'third', name: 'Third', password: 'p' })]);
+  assert.equal(concurrent.filter(r => r.status === 'fulfilled').length, 1);
+  assert.equal((await reloaded()).accounts.length, 3);
+  const originalWrite = localStorage.setItem;
+  localStorage.setItem = () => { throw new Error('QuotaExceededError'); };
+  const current = (await reloaded()).player;
+  await assert.rejects(reloaded({ action: 'save', player: current, revision: current.revision }), error => error.status === 503);
+  localStorage.setItem = originalWrite;
+  assert.equal((await reloaded()).player.revision, current.revision);
+  console.log('PASS: local registration, credentials, persistence, revisions, scores, logout, rankings, concurrent registration and quota errors');
+})().catch(error => { console.error(error); process.exitCode = 1; });

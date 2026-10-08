@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { assetPath } from '@/lib/deployment';
+
 type EffectName = 'click' | 'correct' | 'incorrect' | 'mission' | 'victory';
 const defaults = { muted: false, music: 0.3, effects: 0.65 };
 const storageKey = 'database-city-audio-v1';
@@ -19,7 +21,7 @@ export function useGameAudio(screen: string) {
   const syncMusic = useCallback(() => {
     if (!unlockedRef.current) return;
     const current = settingsRef.current;
-    const source = '/audio/' + trackRef.current + '.wav?v=action-5';
+    const source = assetPath('/audio/' + trackRef.current + '.wav?v=action-5');
     if (!musicRef.current || musicRef.current.getAttribute('src') !== source) {
       musicRef.current?.pause();
       musicRef.current = new Audio(source);
@@ -80,7 +82,7 @@ export function useGameAudio(screen: string) {
     // Feedback replaces the UI click so answer and victory cues stay clear.
     if (name !== 'click') effectsRef.current.forEach(audio => { audio.pause(); effectsRef.current.delete(audio); });
     if (effectsRef.current.size >= 6) return;
-    const audio = new Audio('/audio/' + name + '.wav?v=action-5');
+    const audio = new Audio(assetPath('/audio/' + name + '.wav?v=action-5'));
     audio.volume = current.effects;
     effectsRef.current.add(audio);
     const cleanup = () => effectsRef.current.delete(audio);

@@ -4,6 +4,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { CURRICULUM_MAP_NODES, CURRICULUM_LEVEL_COUNT, ACCESS_PROJECT, DEFAULT_PLAYER } from '@/components/database-city-data';
 import { PixelDetectiveAvatar } from '@/components/pixel-detective-avatar';
+import { gameRequest } from '@/lib/game-client';
+import { LOCAL_MODE, assetPath } from '@/lib/deployment';
 import { scoresCsv } from '@/lib/sheets-export';
 import { useGameAudio } from '@/components/use-game-audio';
 import { GameAudioControls } from '@/components/game-audio-controls';
@@ -73,18 +75,7 @@ export default function App() {
     setTimeout(() => setToastMsg(null), 3500);
   };
 
-  const api = async (body) => {
-    const response = await fetch('/api/game', body ? {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
-    } : { cache: 'no-store' });
-    const data = await response.json();
-    if (!response.ok) {
-      const error = new Error(data.error || 'ไม่สามารถเชื่อมต่อได้');
-      error.status = response.status;
-      throw error;
-    }
-    return data;
-  };
+  const api = gameRequest;
 
   const acceptPlayer = (found) => {
     revisionRef.current = found.revision;
@@ -335,9 +326,7 @@ export default function App() {
     setExportError('');
     try {
       if (!await flushSave()) throw new Error('บันทึกคะแนนยังไม่สำเร็จ กรุณาลองอีกครั้ง');
-      const response = await fetch('/api/game', { cache: 'no-store' });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'โหลดข้อมูลไม่ได้');
+      const data = await api();
       if (!data.player) throw new Error('กรุณาเข้าสู่ระบบอีกครั้ง');
       const url = URL.createObjectURL(new Blob([scoresCsv(data.accounts)], { type: 'text/csv;charset=utf-8' }));
       const link = document.createElement('a');
@@ -435,8 +424,9 @@ export default function App() {
   };
 
   return (
-    <div onClickCapture={event => { const target = event.target as HTMLElement; if (target.closest('button') && !target.closest('[data-audio-controls]') && !target.closest('button')?.hasAttribute('disabled')) audio.play('click'); }} className="min-h-screen bg-[#0f172a] text-slate-100 font-thai flex flex-col select-none relative overflow-x-hidden">
+    <div style={{ '--database-map-bg': `url("${assetPath('/database-london-atlas.png')}")` }} onClickCapture={event => { const target = event.target as HTMLElement; if (target.closest('button') && !target.closest('[data-audio-controls]') && !target.closest('button')?.hasAttribute('disabled')) audio.play('click'); }} className="min-h-screen bg-[#0f172a] text-slate-100 font-thai flex flex-col select-none relative overflow-x-hidden">
       <GameAudioControls settings={audio.settings} update={audio.update} />
+      {LOCAL_MODE && <div className="border-b border-amber-700 bg-amber-950/80 px-4 py-2 text-center text-sm text-amber-100">โหมดเก็บข้อมูลในเครื่อง • บัญชีและคะแนนอยู่ในเบราว์เซอร์นี้ ไม่ซิงก์ข้ามเครื่อง • ควรดาวน์โหลดคะแนนก่อนล้างข้อมูลเบราว์เซอร์</div>}
 
       {toastMsg && (
         <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-[#fde047] text-black font-black px-6 py-2.5 rounded-xl border-3 border-black shadow-[4px_4px_0px_#000] text-base md:text-lg animate-bounce">
@@ -1226,7 +1216,7 @@ export default function App() {
                 <h2 className="text-xl md:text-2xl font-black text-white">อันดับการตอบคำถาม</h2>
                 {player.role === 'teacher' && <p className="mt-2 text-sm font-bold text-emerald-400">บัญชีครู</p>}
                 <p className="text-base text-[#38bdf8] mt-2">เรียงจากตอบถูกมากที่สุด หากเท่ากันเรียงจากตอบผิดน้อยที่สุด</p>
-                <p className="text-sm text-slate-400 mt-1">ผู้เล่นทั้งหมด • อัปเดตทุก 15 วินาที • นับรวมการเล่นซ้ำและมินิเกม</p>
+                <p className="text-sm text-slate-400 mt-1">{LOCAL_MODE ? 'บัญชีในเบราว์เซอร์นี้' : 'ผู้เล่นทั้งหมด'} • อัปเดตทุก 15 วินาที • นับรวมการเล่นซ้ำและมินิเกม</p>
               </div>
 
               <div className="mb-5 rounded-xl border border-emerald-700 bg-emerald-950/40 p-4">

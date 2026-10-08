@@ -20,3 +20,7 @@ data/*.bak
 data/*.json
 data/*.lock
 data/*.tmp
+
+# Static Pages build artifacts
+out/
+.pages-build-*/
