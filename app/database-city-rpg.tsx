@@ -5,6 +5,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { CURRICULUM_MAP_NODES, CURRICULUM_LEVEL_COUNT, ACCESS_PROJECT, DEFAULT_PLAYER } from '@/components/database-city-data';
 import { PixelDetectiveAvatar } from '@/components/pixel-detective-avatar';
 import { scoresCsv } from '@/lib/sheets-export';
+import { useGameAudio } from '@/components/use-game-audio';
+import { GameAudioControls } from '@/components/game-audio-controls';
 import { TeacherDashboard } from '@/components/teacher-dashboard';
 import { Landmark, LibraryBig, Files, ShieldCheck, Network, KeyRound, Link2, Wrench, Table2, Vault, Search, Fingerprint, PanelsTopLeft, ChartNoAxesCombined, Building2, Crown, LockKeyhole, Check, ArrowRight } from 'lucide-react';
 
@@ -13,6 +15,7 @@ const CASE_ICONS = [Landmark, LibraryBig, Files, ShieldCheck, Network, KeyRound,
 
 export default function App() {
   const [screen, setScreen] = useState('START'); // 'START', 'AUTH', 'CREATE_CHAR', 'WORLD_MAP', 'MISSION_PLAY', 'CLASSROOM', 'INVENTORY'
+  const audio = useGameAudio(screen);
   const [authMode, setAuthMode] = useState('LOGIN'); // 'LOGIN' or 'REGISTER'
 
   const [accounts, setAccounts] = useState([]);
@@ -283,6 +286,7 @@ export default function App() {
       return;
     }
 
+    audio.play('mission');
     setSelectedNode(node);
     setIsWalking(true);
     setPlayerPos({ x: node.x, y: node.y + 40 });
@@ -298,6 +302,7 @@ export default function App() {
   };
 
   const recordAnswer = (correct) => {
+    audio.play(correct ? 'correct' : 'incorrect');
     setPlayer(previous => previous ? {
       ...previous,
       weeklyScores: {
@@ -351,6 +356,7 @@ export default function App() {
 
   const handleCompleteLevel = (levelNum) => {
     if (!player) return;
+    audio.play('victory');
 
     if (!player.completedLevels.includes(levelNum)) {
       const earnedXp = 100;
@@ -429,7 +435,8 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-slate-100 font-thai flex flex-col select-none relative overflow-x-hidden">
+    <div onClickCapture={event => { const target = event.target as HTMLElement; if (target.closest('button') && !target.closest('[data-audio-controls]') && !target.closest('button')?.hasAttribute('disabled')) audio.play('click'); }} className="min-h-screen bg-[#0f172a] text-slate-100 font-thai flex flex-col select-none relative overflow-x-hidden">
+      <GameAudioControls settings={audio.settings} update={audio.update} />
 
       {toastMsg && (
         <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-[#fde047] text-black font-black px-6 py-2.5 rounded-xl border-3 border-black shadow-[4px_4px_0px_#000] text-base md:text-lg animate-bounce">
