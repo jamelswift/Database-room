@@ -20,7 +20,12 @@ data/*.bak
 data/*.json
 data/*.lock
 data/*.tmp
+data/postgres/
 
 # Static Pages build artifacts
 out/
 .pages-build-*/
+
+.corepack-cache/
+
+.build-system-ca.pem

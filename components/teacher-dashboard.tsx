@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { teacherReport } from '@/lib/game-client';
 import { CURRICULUM_LEVEL_COUNT, CURRICULUM_MAP_NODES } from './database-city-data';
 import type { StudentReport } from '@/lib/weekly-scores';
 import { weeklyScoresCsv } from '@/lib/sheets-export';
@@ -8,6 +9,8 @@ import { WeeklyScoreChart } from './weekly-score-chart';
 import { TotalScoreChart } from './total-score-chart';
 
 export function TeacherDashboard() {
+  const refreshTask = useRef<Promise<void> | null>(null);
+  const refreshAgain = useRef(false);
   const [students, setStudents] = useState<StudentReport[]>([]);
   const [week, setWeek] = useState(1);
   const [search, setSearch] = useState('');
@@ -15,25 +18,38 @@ export function TeacherDashboard() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [refreshed, setRefreshed] = useState('');
-  const refresh = useCallback(async (signal?: AbortSignal) => {
-    try {
-      const response = await fetch('/api/teacher', { cache: 'no-store', signal });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'โหลดข้อมูลไม่ได้');
-      if (signal?.aborted) return;
-      setStudents(data.students);
-      setError('');
-      setRefreshed(new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' }));
-    } catch (failure) {
-      if (!signal?.aborted) setError(failure instanceof Error ? failure.message : 'โหลดข้อมูลไม่ได้');
-    } finally {
-      if (!signal?.aborted) setLoading(false);
-    }
+  const refresh = useCallback((signal?: AbortSignal): Promise<void> => {
+    if (refreshTask.current) { refreshAgain.current = true; return refreshTask.current; }
+    const task = (async () => {
+      do {
+        refreshAgain.current = false;
+        try {
+          const data = await teacherReport(signal);
+          if (signal?.aborted) return;
+          setStudents(data.students);
+          setError('');
+          setRefreshed(new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' }));
+        } catch (failure) {
+          if (!signal?.aborted) setError(failure instanceof Error ? failure.message : 'โหลดข้อมูลไม่ได้');
+        } finally {
+          if (!signal?.aborted) setLoading(false);
+        }
+      } while (refreshAgain.current && !signal?.aborted);
+    })();
+    refreshTask.current = task;
+    void task.finally(() => { if (refreshTask.current === task) refreshTask.current = null; });
+    return task;
   }, []);
   useEffect(() => {
     const controller = new AbortController();
-    void refresh(controller.signal);
-    const timer = setInterval(() => { void refresh(controller.signal); }, 15000);
+    const reload = () => { void refresh(controller.signal); };
+    reload();
+    window.addEventListener('online', reload);
+    return () => { controller.abort(); window.removeEventListener('online', reload); };
+  }, [refresh]);
+  useEffect(() => {
+    const controller = new AbortController();
+    const timer = setInterval(() => { void refresh(controller.signal); }, 3000);
     return () => { controller.abort(); clearInterval(timer); };
   }, [refresh]);
   const filtered = students.filter(s => `${s.name} ${s.username}`.toLowerCase().includes(search.toLowerCase()));
@@ -61,7 +77,8 @@ export function TeacherDashboard() {
   return <section className="mx-auto w-full max-w-6xl space-y-5 p-4 md:p-8">
     <div className="rounded-3xl border-4 border-emerald-500 bg-slate-800 p-5 md:p-8">
       <h2 className="text-2xl font-black text-white">ห้องเรียนของครู</h2>
-      <p className="mt-2 text-slate-300">นักเรียนทั้งหมด {students.length} คน • คะแนนตามสัปดาห์บทเรียน 1–16 • อัปเดตทุก 15 วินาที</p>
+      <p className="mt-2 text-slate-300">นักเรียนทั้งหมด {students.length} คน • คะแนนตามสัปดาห์บทเรียน 1–16</p>
+      <p role="status" className="mt-2 text-sm font-bold text-emerald-300">ตรวจคะแนนจากเซิร์ฟเวอร์ทุก 3 วินาที</p>
       <p className="mt-1 text-sm text-slate-400">ตอบถูก/ผิดเป็นยอดสะสม รวมการเล่นซ้ำและมินิเกม ไม่ใช่คะแนนสอบหรือคะแนนเต็มประจำสัปดาห์</p>
       <div className="my-5 flex flex-wrap items-end gap-3">
         <label className="text-sm text-slate-200">สัปดาห์บทเรียน

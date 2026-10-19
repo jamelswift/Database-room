@@ -22,10 +22,13 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec tsc --noEmit --incremental false
       - run: pnpm run test:local
+      - run: pnpm run test:cloud
       - uses: actions/configure-pages@v5
       - run: pnpm run build:pages
         env:
           NEXT_PUBLIC_BASE_PATH: /Database-room
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out

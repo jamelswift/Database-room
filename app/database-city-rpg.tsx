@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { CURRICULUM_MAP_NODES, CURRICULUM_LEVEL_COUNT, ACCESS_PROJECT, DEFAULT_PLAYER } from '@/components/database-city-data';
 import { PixelDetectiveAvatar } from '@/components/pixel-detective-avatar';
+import { completePlayerLevel } from '@/lib/player-progress';
 import { gameRequest } from '@/lib/game-client';
 import { LOCAL_MODE, assetPath } from '@/lib/deployment';
 import { scoresCsv } from '@/lib/sheets-export';
@@ -13,6 +14,25 @@ import { TeacherDashboard } from '@/components/teacher-dashboard';
 import { Landmark, LibraryBig, Files, ShieldCheck, Network, KeyRound, Link2, Wrench, Table2, Vault, Search, Fingerprint, PanelsTopLeft, ChartNoAxesCombined, Building2, Crown, LockKeyhole, Check, ArrowRight } from 'lucide-react';
 
 const CASE_ICONS = [Landmark, LibraryBig, Files, ShieldCheck, Network, KeyRound, Link2, Wrench, Table2, Vault, Search, Fingerprint, PanelsTopLeft, ChartNoAxesCombined, Building2, Crown];
+
+const ACCESS_DOWNLOADS: Record<number, { name: string; file: string; note?: string }[]> = {
+  1: [
+    { name: 'ข้อมูล tbl_Sales สำหรับใบงานที่ 1: สำรวจความซ้ำซ้อน (CSV ภาษาไทย Unicode)', file: 'Problem_Database.csv', note: 'ข้อมูลจำลองลูกค้า 13 คน รวม 29 รายการขาย ทุกคนมีรายการซื้อซ้ำ 2–3 แถว สำหรับทดลองแก้เบอร์โทรศัพท์เฉพาะแถวแรก' },
+    { name: 'คู่มือใบงานที่ 1: นำเข้า Access ทดลองแก้ไข และบันทึกผล', file: 'Problem_Database_Access_Import.txt', note: 'นำเข้า CSV เป็นตาราง tbl_Sales แล้วบันทึกฐานข้อมูลชื่อ Problem_Database.accdb ก่อนเริ่มทดลอง' },
+  ],
+  2: [
+    { name: 'แบบฟอร์ม Data Dictionary (Excel)', file: 'Data_Dictionary_Template.xlsx' },
+    { name: 'ดาวน์โหลดแบบ CSV', file: 'Data_Dictionary_Template.csv' },
+  ],
+  3: [{ name: 'กระดาษกริดวาด ERD (A4 แนวนอน)', file: 'ERD_Grid_Canvas.svg' }],
+  4: [{ name: 'คู่มือเริ่มไฟล์โครงงานเปล่าใน Access', file: 'Blank_Project_Setup.txt', note: 'สร้างไฟล์ .accdb เปล่าผ่าน Access ตามคู่มือ' }],
+  6: [
+    { name: 'รายการประเภทหนังสือสำหรับ Lookup (Excel)', file: 'Lookup_Data_Source.xlsx' },
+    { name: 'ดาวน์โหลดแบบ CSV', file: 'Lookup_Data_Source.csv' },
+  ],
+  8: [{ name: 'ชุดฝึก Relationships พร้อมรายชื่อทั้ง 13 คน (ZIP: 3 ตาราง CSV)', file: 'Pre_Relations_Data.zip' }],
+  10: [{ name: 'ชุดข้อมูลข้อสอบพร้อมรายชื่อทั้ง 13 คน (ZIP: ตารางดิบ CSV)', file: 'Exam_Midterm_Source.zip' }],
+};
 
 
 export default function App() {
@@ -346,27 +366,10 @@ export default function App() {
   const handleCompleteLevel = (levelNum) => {
     if (!player) return;
     audio.play('victory');
-
     if (!player.completedLevels.includes(levelNum)) {
-      const earnedXp = 100;
-      const earnedCoins = 35;
-      const newCompleted = [...player.completedLevels, levelNum];
-      const newBadges = [...player.badges, `BADGE LV.${levelNum < 10 ? '0' + levelNum : levelNum}`];
-      const newInventory = [...player.inventory, `📜 Case Solved Doc #${levelNum}`];
-      const nextLevelUnlocked = Math.min(CURRICULUM_LEVEL_COUNT, Math.max(player.level, levelNum + 1));
-
-      const updated = {
-        ...player,
-        xp: player.xp + earnedXp,
-        coins: player.coins + earnedCoins,
-        level: nextLevelUnlocked,
-        completedLevels: newCompleted,
-        badges: newBadges,
-        inventory: newInventory,
-      };
-
-      setPlayer(previous => ({ ...updated, answerStats: previous.answerStats }));
-      triggerToast(`🎉 ผ่านภารกิจ Level ${levelNum}! ปลดล็อกด่านถัดไปและรับ 100 XP`);
+      // Use the latest state: the final answer and weekly scores were just queued.
+      setPlayer(previous => previous ? completePlayerLevel(previous, levelNum) : previous);
+      triggerToast('🎉 ผ่านภารกิจ Level ' + levelNum + '! ปลดล็อกด่านถัดไปและรับ 100 XP');
     }
   };
 
@@ -916,6 +919,19 @@ export default function App() {
                       <ol className="list-decimal pl-6 space-y-3 text-slate-100">
                         {loc.steps.map((step, index) => <li key={index}>{step}</li>)}
                       </ol>
+                      {ACCESS_DOWNLOADS[loc.level]?.length ? (
+                        <div className="rounded-xl border border-emerald-500/60 bg-emerald-950/50 p-4 space-y-2" aria-label={`ไฟล์ดาวน์โหลดสัปดาห์ ${loc.level}`}>
+                          <h5 className="font-bold text-emerald-300">ไฟล์ประกอบสัปดาห์นี้</h5>
+                          {ACCESS_DOWNLOADS[loc.level].map(resource => (
+                            <div key={resource.file}>
+                              <a className="inline-flex items-center gap-2 text-emerald-200 underline underline-offset-4 hover:text-white" href={assetPath(`/access-resources/${resource.file}`)} download>
+                                <Files size={16} aria-hidden="true" />{resource.name} ↓
+                              </a>
+                              {resource.note && <p className="mt-1 text-sm text-slate-300">{resource.note}</p>}
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
                       <div className="space-y-2 border-t border-slate-600 pt-4">
                         <p><strong className="text-sky-300">หลักฐานที่ต้องส่ง:</strong> {loc.evidence}</p>
                         <p><strong className="text-sky-300">เกณฑ์ตรวจ:</strong> {loc.assessment}</p>
@@ -1204,7 +1220,7 @@ export default function App() {
           );
         })()}
 
-        {screen === 'CLASSROOM' && player?.role === 'teacher' && <TeacherDashboard />}
+        {screen === 'CLASSROOM' && player?.role === 'teacher' && <><div className="mx-auto flex w-full max-w-6xl justify-end px-4 pt-4"><button type="button" onClick={handleLogout} className="rounded-lg bg-rose-700 px-4 py-2 font-bold text-white hover:bg-rose-600">ออกจากระบบครู</button></div><TeacherDashboard /></>}
         {screen === 'CLASSROOM' && player && player.role !== 'teacher' && (
           <div className="max-w-4xl mx-auto p-4 md:p-8 w-full space-y-6">
             <div className="bg-[#1e293b] border-4 border-[#38bdf8] rounded-3xl shadow-[8px_8px_0px_#000] p-6 md:p-8 relative">

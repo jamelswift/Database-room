@@ -11,6 +11,7 @@ process.env.GAME_DATABASE_PATH = path.join(testDirectory, 'game.json');
 const cache = new Map();
 function load(file) {
   file = path.resolve(file);
+  if (file === path.join(root, 'lib/database.ts')) return { database: load(path.join(root, 'lib/file-database.ts')).fileDatabase };
   if (cache.has(file)) return cache.get(file).exports;
   const module = new Module(file);
   cache.set(file, module);
@@ -110,10 +111,10 @@ function load(file) {
   assert.ok(escaped.endsWith(',0,0,0,\r\n'));
   assert.equal(scoresCsv([]), '\uFEFFUsername,DisplayName,CorrectAnswers,IncorrectAnswers,TotalAnswers,AccuracyPercent\r\n');
   const compiledDatabase = path.join(testDirectory, 'database.cjs');
-  fs.writeFileSync(compiledDatabase, ts.transpileModule(fs.readFileSync(path.join(root, 'lib/database.ts'), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, esModuleInterop: true } }).outputText);
+  fs.writeFileSync(compiledDatabase, ts.transpileModule(fs.readFileSync(path.join(root, 'lib/file-database.ts'), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, esModuleInterop: true } }).outputText);
   const execFile = require('node:util').promisify(require('node:child_process').execFile);
   const runChild = code => execFile(process.execPath, ['-e', code], { env: process.env });
-  const prelude = `const assert = require('node:assert/strict'); const { database } = require(${JSON.stringify(compiledDatabase)});`;
+  const prelude = `const assert = require('node:assert/strict'); const { fileDatabase: database } = require(${JSON.stringify(compiledDatabase)});`;
   await runChild(prelude + "database.findPlayer('test.student').then(p => { assert.equal(p.CorrectAnswers, 8); assert.equal(p.Revision, 1); }).catch(e => { console.error(e); process.exitCode = 1; });");
   const base = await database.findPlayer('test.student');
   await Promise.all(Array.from({ length: 4 }, (_, i) => runChild(prelude + `database.register(${JSON.stringify({ ...base, Username: `parallel-${i}` })}).catch(e => { console.error(e); process.exitCode = 1; });`)));
