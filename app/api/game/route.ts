@@ -26,7 +26,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    if (request.headers.get('origin') !== request.nextUrl.origin) throw new RequestError('คำขอไม่ถูกต้อง', 403);
+    const publicOrigin = `${request.nextUrl.protocol}//${request.headers.get('host') || request.nextUrl.host}`;
+    if (request.headers.get('origin') !== publicOrigin) throw new RequestError('คำขอไม่ถูกต้อง', 403);
     const text = await request.text();
     if (Buffer.byteLength(text) > 32768) throw new RequestError('ข้อมูลมีขนาดใหญ่เกินไป', 413);
     let body;
