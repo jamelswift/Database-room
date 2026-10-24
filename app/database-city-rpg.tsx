@@ -1,6 +1,9 @@
 // @ts-nocheck
 'use client';
 
+import { COURSE_SCHEDULE } from '@/components/course-schedule';
+import { QUESTIONS_PER_LEVEL } from '@/components/unit-quiz-bank';
+import { CASE_RESOURCES } from '@/components/case-resources';
 import React, { useState, useEffect, useRef } from 'react';
 import { CURRICULUM_MAP_NODES, CURRICULUM_LEVEL_COUNT, ACCESS_PROJECT, DEFAULT_PLAYER } from '@/components/database-city-data';
 import { PixelDetectiveAvatar } from '@/components/pixel-detective-avatar';
@@ -14,26 +17,6 @@ import { TeacherDashboard } from '@/components/teacher-dashboard';
 import { Landmark, LibraryBig, Files, ShieldCheck, Network, KeyRound, Link2, Wrench, Table2, Vault, Search, Fingerprint, PanelsTopLeft, ChartNoAxesCombined, Building2, Crown, LockKeyhole, Check, ArrowRight } from 'lucide-react';
 
 const CASE_ICONS = [Landmark, LibraryBig, Files, ShieldCheck, Network, KeyRound, Link2, Wrench, Table2, Vault, Search, Fingerprint, PanelsTopLeft, ChartNoAxesCombined, Building2, Crown];
-
-const ACCESS_DOWNLOADS: Record<number, { name: string; file: string; note?: string }[]> = {
-  1: [
-    { name: 'ข้อมูล tbl_Sales สำหรับใบงานที่ 1: สำรวจความซ้ำซ้อน (CSV ภาษาไทย Unicode)', file: 'Problem_Database.csv', note: 'ข้อมูลจำลองลูกค้า 13 คน รวม 29 รายการขาย ทุกคนมีรายการซื้อซ้ำ 2–3 แถว สำหรับทดลองแก้เบอร์โทรศัพท์เฉพาะแถวแรก' },
-    { name: 'คู่มือใบงานที่ 1: นำเข้า Access ทดลองแก้ไข และบันทึกผล', file: 'Problem_Database_Access_Import.txt', note: 'นำเข้า CSV เป็นตาราง tbl_Sales แล้วบันทึกฐานข้อมูลชื่อ Problem_Database.accdb ก่อนเริ่มทดลอง' },
-  ],
-  2: [
-    { name: 'แบบฟอร์ม Data Dictionary (Excel)', file: 'Data_Dictionary_Template.xlsx' },
-    { name: 'ดาวน์โหลดแบบ CSV', file: 'Data_Dictionary_Template.csv' },
-  ],
-  3: [{ name: 'กระดาษกริดวาด ERD (A4 แนวนอน)', file: 'ERD_Grid_Canvas.svg' }],
-  4: [{ name: 'คู่มือเริ่มไฟล์โครงงานเปล่าใน Access', file: 'Blank_Project_Setup.txt', note: 'สร้างไฟล์ .accdb เปล่าผ่าน Access ตามคู่มือ' }],
-  6: [
-    { name: 'รายการประเภทหนังสือสำหรับ Lookup (Excel)', file: 'Lookup_Data_Source.xlsx' },
-    { name: 'ดาวน์โหลดแบบ CSV', file: 'Lookup_Data_Source.csv' },
-  ],
-  8: [{ name: 'ชุดฝึก Relationships พร้อมรายชื่อทั้ง 13 คน (ZIP: 3 ตาราง CSV)', file: 'Pre_Relations_Data.zip' }],
-  10: [{ name: 'ชุดข้อมูลข้อสอบพร้อมรายชื่อทั้ง 13 คน (ZIP: ตารางดิบ CSV)', file: 'Exam_Midterm_Source.zip' }],
-};
-
 
 export default function App() {
   const [screen, setScreen] = useState('START'); // 'START', 'AUTH', 'CREATE_CHAR', 'WORLD_MAP', 'MISSION_PLAY', 'CLASSROOM', 'INVENTORY'
@@ -253,8 +236,7 @@ export default function App() {
   };
 
   const createQuizRound = (node, round = 0) => {
-    // Start with this unit, then review up to nine preceding units using authored questions.
-    const questionNode = CURRICULUM_MAP_NODES[node.level - 1 - round];
+    const questionNode = node.questions[round];
     const choices = questionNode.options;
     const correctIndex = questionNode.correctIndex;
     setQuizQuestion(questionNode.question);
@@ -404,7 +386,7 @@ export default function App() {
             DATABASE CITY
           </h1>
           <span className="text-[14px] text-[#93c5fd] font-semibold">
-            แผนที่ผจญภัยนักสืบฐานข้อมูล • 16 สัปดาห์ ปวช.1
+            แผนที่ผจญภัยนักสืบฐานข้อมูล • 16 หน่วย • 18 สัปดาห์ ปวช.1
           </span>
         </div>
 
@@ -458,17 +440,18 @@ export default function App() {
               <span className="text-xs text-[#f472b6] font-black font-retro">ปวช.1</span>
             </div>
 
-            <div className="my-auto py-8 space-y-6 z-10 max-w-2xl">
+            <div className="my-auto py-8 space-y-6 z-10 w-full max-w-5xl">
               <div className="inline-block bg-[#0f172a] border-2 border-[#fbbf24] px-6 py-1.5 rounded-full shadow-[3px_3px_0px_#000]">
                 <span className="text-base text-[#fef08a] font-black">🕹️ สไตล์เกมผจญภัยแผนที่โลก (Retro World Adventure)</span>
               </div>
 
-              <h1 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#38bdf8] via-[#fbbf24] to-[#4ade80] font-retro py-2 drop-shadow-[4px_4px_0px_#000] leading-tight">
-                DATABASE CITY
+              <h1 className="database-city-logo text-transparent bg-clip-text bg-gradient-to-r from-[#38bdf8] via-[#fbbf24] to-[#4ade80] py-2 drop-shadow-[4px_4px_0px_#000]" aria-label="DATABASE CITY">
+                <span className="block">DATABASE</span>
+                <span className="block">CITY</span>
               </h1>
 
               <h2 className="text-xl md:text-2xl text-white font-extrabold tracking-wide">
-                ภารกิจนักสืบฐานข้อมูล 16 สัปดาห์ พร้อมโครงงาน Microsoft Access
+                ภารกิจนักสืบฐานข้อมูล 16 หน่วย • 18 สัปดาห์ พร้อมโครงงาน MySQL
               </h2>
 
               <p className="text-lg text-slate-300 leading-relaxed font-medium">
@@ -503,8 +486,17 @@ export default function App() {
               </div>
             </div>
 
+            <details className="z-10 w-full max-w-4xl my-6 rounded-2xl border-2 border-sky-400 bg-slate-900/90 p-5 text-left">
+              <summary className="cursor-pointer font-bold text-sky-200">กำหนดการสอน 18 สัปดาห์ • 16 หน่วยการเรียนรู้</summary>
+              <p className="mt-3 text-slate-300">หน่วยเรียนสัปดาห์ละทฤษฎี 2 คาบ และปฏิบัติ 2 คาบ รวมการเรียน 64 คาบ; หากจัดสอบครั้งละ 4 คาบ รวมทั้งภาคเรียน 72 คาบ</p>
+              <ol className="mt-4 space-y-3">
+                {COURSE_SCHEDULE.map(item => <li key={item.week} className="border-b border-slate-700 pb-3"><span className="text-amber-300">สัปดาห์ {item.week} • {item.date}</span><p className="text-white">{item.title}</p></li>)}
+              </ol>
+              <p className="mt-3 text-sm text-slate-400">ปรับปีเดือนมกราคม–กุมภาพันธ์เป็น 2570 ให้ต่อเนื่องจากเดือนธันวาคม 2569; ชั่วโมงสอบยึดตามประกาศของครู</p>
+              <a className="mt-4 inline-flex rounded-lg border border-sky-400 bg-sky-950 px-4 py-2 font-bold text-sky-100 hover:bg-sky-900" href={assetPath('/case-resources/Database_City_All_Cases.zip')} download>ดาวน์โหลดใบงานและไฟล์ฝึกครบ 16 หน่วย (.zip) ↓</a>
+            </details>
             <footer className="text-base text-slate-400 bg-slate-900/80 px-4 py-2 rounded-xl border border-slate-700 z-10">
-              DATABASE CITY • 16 Weeks • Microsoft Access Project
+              DATABASE CITY • 18 Weeks • MySQL Workbench Project
             </footer>
           </div>
         )}
@@ -891,7 +883,7 @@ export default function App() {
                 {missionPhase === 'lessons' && (
                   <div className="mt-6 space-y-6">
                     <div className="bg-slate-900/90 border-2 border-[#fbbf24] rounded-2xl p-5 shadow-inner space-y-4">
-                      <h4 className="text-lg font-black text-[#facc15]">📚 บทเรียนวิชา 20901-2001 ปวช.1 ({loc.week}):</h4>
+                      <h4 className="text-lg font-black text-[#facc15]">📚 บทเรียนวิชา 20901-2001 ปวช.1 ({loc.week} • {loc.date} • ทฤษฎี 2 คาบ / ปฏิบัติ 2 คาบ):</h4>
                       <div className="space-y-3">
                         {loc.lessons.map((lessonText, lIdx) => (
                           <div key={lIdx} className="flex items-start space-x-2.5 bg-black/40 p-3 rounded-xl border border-slate-700">
@@ -919,17 +911,21 @@ export default function App() {
                       <ol className="list-decimal pl-6 space-y-3 text-slate-100">
                         {loc.steps.map((step, index) => <li key={index}>{step}</li>)}
                       </ol>
-                      {ACCESS_DOWNLOADS[loc.level]?.length ? (
-                        <div className="rounded-xl border border-emerald-500/60 bg-emerald-950/50 p-4 space-y-2" aria-label={`ไฟล์ดาวน์โหลดสัปดาห์ ${loc.level}`}>
-                          <h5 className="font-bold text-emerald-300">ไฟล์ประกอบสัปดาห์นี้</h5>
-                          {ACCESS_DOWNLOADS[loc.level].map(resource => (
+                      {CASE_RESOURCES[loc.level] ? (
+                        <div className="rounded-xl border border-emerald-500/60 bg-emerald-950/50 p-4 space-y-3" aria-label={`ใบงานหน่วยที่ ${loc.level} ${loc.week}`}>
+                          <h5 className="font-bold text-emerald-300">📂 Case File {String(loc.level).padStart(2, '0')} • ใบงานและไฟล์ฝึกปฏิบัติ</h5>
+                          <p className="text-sm text-emerald-100">{CASE_RESOURCES[loc.level].note}</p>
+                          {CASE_RESOURCES[loc.level].files.map(resource => (
                             <div key={resource.file}>
-                              <a className="inline-flex items-center gap-2 text-emerald-200 underline underline-offset-4 hover:text-white" href={assetPath(`/access-resources/${resource.file}`)} download>
+                              <a className="inline-flex items-center gap-2 text-emerald-200 underline underline-offset-4 hover:text-white" href={assetPath(`/case-resources/${resource.file}`)} download>
                                 <Files size={16} aria-hidden="true" />{resource.name} ↓
                               </a>
-                              {resource.note && <p className="mt-1 text-sm text-slate-300">{resource.note}</p>}
+                              <p className="mt-1 break-all font-mono text-xs text-slate-300">{resource.file}</p>
                             </div>
                           ))}
+                          <a className="inline-flex items-center gap-2 rounded-lg border border-emerald-400 bg-emerald-900 px-4 py-2 font-bold text-white hover:bg-emerald-800" href={assetPath(`/case-resources/${CASE_RESOURCES[loc.level].bundle}`)} download>
+                            ดาวน์โหลดทั้งชุดของด่านนี้ (.zip) ↓
+                          </a>
                         </div>
                       ) : null}
                       <div className="space-y-2 border-t border-slate-600 pt-4">
@@ -965,7 +961,7 @@ export default function App() {
                     {loc.gameType === 'quiz' && (
                       <>
                         <div className="flex justify-between items-center">
-                          <span className="text-base font-black text-[#38bdf8]">ทบทวนสัปดาห์นี้และสัปดาห์ก่อนหน้า • ข้อที่ {quizRound + 1}/{Math.min(10, loc.level)}</span>
+                          <span className="text-base font-black text-[#38bdf8]">แบบฝึกประจำด่าน • ข้อที่ {quizRound + 1}/{QUESTIONS_PER_LEVEL}</span>
                           <button
                             onClick={() => {
                               setShowHint(true);
@@ -978,12 +974,12 @@ export default function App() {
 
                         <div className="bg-black/50 border-2 border-slate-600 p-4 rounded-xl">
                           <p className="text-lg md:text-base text-white font-bold">{quizQuestion}</p>
-                          <p className="text-[14px] text-slate-400 mt-2">ทำให้ครบ {Math.min(10, loc.level)} ข้อ • ตอบถูก {quizCorrectCount} ข้อ • ตอบแล้วกดข้อถัดไปได้เลย</p>
+                          <p className="text-[14px] text-slate-400 mt-2">ทำให้ครบ {QUESTIONS_PER_LEVEL} ข้อ • ตอบถูก {quizCorrectCount} ข้อ • ตอบแล้วกดข้อถัดไปได้เลย</p>
                         </div>
 
                         {showHint && (
                           <div className="bg-amber-400/20 border-2 border-amber-400 rounded-xl p-3 text-base text-amber-300 font-bold">
-                            💡 คำใบ้จากอาจารย์ที่ปรึกษา: {CURRICULUM_MAP_NODES[loc.level - 1 - quizRound].hint}
+                            💡 คำใบ้จากอาจารย์ที่ปรึกษา: {loc.hint}
                           </div>
                         )}
 
@@ -1019,7 +1015,7 @@ export default function App() {
                             </p>
                             <button
                               onClick={() => {
-                                if (quizRound === Math.min(10, loc.level) - 1) {
+                                if (quizRound === QUESTIONS_PER_LEVEL - 1) {
                                   setQuizSuccess(true);
                                   handleCompleteLevel(loc.level);
                                 } else {
@@ -1028,7 +1024,7 @@ export default function App() {
                               }}
                               className="bg-[#38bdf8] hover:bg-sky-300 text-black font-black px-5 py-3 rounded-xl border-2 border-black"
                             >
-                              {quizRound === Math.min(10, loc.level) - 1 ? 'ดูผลคะแนน' : 'ข้อถัดไป ➜'}
+                              {quizRound === QUESTIONS_PER_LEVEL - 1 ? 'ดูผลคะแนน' : 'ข้อถัดไป ➜'}
                             </button>
                           </div>
                         )}
@@ -1189,7 +1185,7 @@ export default function App() {
                     {quizSuccess === true && (
                       <div className="bg-emerald-500/20 border-3 border-emerald-400 rounded-2xl p-5 text-center space-y-3">
                         {loc.gameType === 'quiz' && (
-                          <p className="text-lg font-black text-white">คะแนนแบบฝึก {quizCorrectCount}/{Math.min(10, loc.level)}</p>
+                          <p className="text-lg font-black text-white">คะแนนแบบฝึก {quizCorrectCount}/{QUESTIONS_PER_LEVEL}</p>
                         )}
                         <h4 className="text-emerald-400 font-black text-sm font-retro">
                           ★ CASE CLEAR! สำเร็จภารกิจ ★

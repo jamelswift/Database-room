@@ -8,6 +8,8 @@ __v0_jsx-dev-runtime.ts
 
 # Environment variables
 .env*.local
+.env
+.neon
 
 # Common ignores
 node_modules
@@ -29,3 +31,5 @@ out/
 .corepack-cache/
 
 .build-system-ca.pem
+/tmp/worksheet-build/
+/scripts/__pycache__/

@@ -5,11 +5,13 @@ const { Client } = require('pg');
 const root = path.resolve(__dirname, '..');
 
 (async () => {
-  const envFile = path.join(root, '.env.local');
-  if (fs.existsSync(envFile)) process.loadEnvFile(envFile);
+  for (const name of ['.env.local', '.env']) {
+    const envFile = path.join(root, name);
+    if (fs.existsSync(envFile)) process.loadEnvFile(envFile);
+  }
   if (!process.env.DATABASE_URL) throw new Error('Set DATABASE_URL to the PostgreSQL connection URL in the service environment.');
   if (process.env.NEXT_PUBLIC_LOCAL_MODE === 'true') throw new Error('Rebuild with NEXT_PUBLIC_LOCAL_MODE=false for server deployment.');
-  const client = new Client({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 10000 });
+  const client = new Client({ connectionString: process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL, connectionTimeoutMillis: 10000 });
   await client.connect();
   try {
     await client.query('BEGIN');

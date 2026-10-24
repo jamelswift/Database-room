@@ -1,8 +1,14 @@
 const assert = require('node:assert/strict');
 const { randomBytes } = require('node:crypto');
 const { Client } = require('pg');
-process.loadEnvFile('.env.local');
+const fs = require('node:fs');
+for (const filename of ['.env.local', '.env']) {
+  if (fs.existsSync(filename)) process.loadEnvFile(filename);
+}
 const base = process.env.TEST_BASE_URL || 'http://localhost:3000';
+if (process.env.TEST_REQUIRE_NEON === 'true') {
+  assert.ok(new URL(process.env.DATABASE_URL).hostname.endsWith('.neon.tech'), 'Expected a Neon DATABASE_URL; refusing to report a local database test as Neon verification.');
+}
 const username = 'connection-test-' + randomBytes(8).toString('hex');
 const password = randomBytes(24).toString('hex');
 const client = new Client({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 5000 });

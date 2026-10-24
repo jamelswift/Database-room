@@ -1,3 +1,5 @@
+import { COURSE_SCHEDULE } from './course-schedule';
+import { buildUnitQuiz } from './unit-quiz-bank';
 // สัปดาห์เรียงตามแผนการสอนที่ครูให้มา; งานปฏิบัติประเมินโดยครูแยกจากมินิเกม
 type Unit = {
   title: string;
@@ -14,9 +16,9 @@ type Unit = {
 
 export const ACCESS_PROJECT = {
   title: 'โครงงานต่อเนื่อง: ระบบยืม–คืนหนังสือ',
-  file: 'Library_รหัสนักเรียน.accdb',
-  description: 'ใช้ข้อมูลสมมติและสร้างไฟล์ของตนเองใน Microsoft Access บน Windows ตั้งแต่สัปดาห์ 4 แล้วต่อยอดไฟล์เดิมในสัปดาห์ถัดไป',
-  submission: 'ส่งไฟล์และหลักฐานตามช่องทางที่ครูกำหนด เว็บไซต์นี้ยังไม่มีระบบอัปโหลดหรือตรวจชิ้นงาน Access',
+  file: 'Library_รหัสนักเรียน.sql',
+  description: 'พัฒนาระบบยืม–คืนหนังสือด้วย MySQL Server และ MySQL Workbench ตั้งแต่หน่วยที่ 4 สะสมสคริปต์ SQL และหลักฐานใน Portfolio',
+  submission: 'ส่งไฟล์ SQL, ERD และ Portfolio ตามช่องทางที่ครูกำหนด การผ่านมินิเกมไม่ถือเป็นการส่งงานปฏิบัติ',
   deadline: 'กำหนดส่ง: ตามที่ครูประกาศในแต่ละสัปดาห์',
 };
 
@@ -55,148 +57,291 @@ const units: Unit[] = [
     options: ['หนึ่งต่อหนึ่งเสมอ', 'ไม่มีความสัมพันธ์', 'หนึ่งต่อหลาย', 'ทุกคอลัมน์เป็นคีย์หลัก'], correctIndex: 2,
   },
   {
-    title: 'เริ่มโครงงาน Microsoft Access',
-    knowledge: 'สรุปขั้นตอนพัฒนาฐานข้อมูลและการใช้ Access เบื้องต้นได้',
-    skill: 'สร้างไฟล์ฐานข้อมูลเปล่าและจัดโครงสร้างโครงงานได้',
-    lessons: ['ขั้นตอนพัฒนา: วิเคราะห์งาน ออกแบบ สร้าง ทดสอบ และส่งมอบพร้อมดูแลรักษา', 'Access มี Table สำหรับข้อมูล Query สำหรับค้นหา/ประมวลผล Form สำหรับติดต่อผู้ใช้ และ Report สำหรับรายงาน', 'ชิ้นงานนักเรียนใช้ไฟล์ Library_รหัสนักเรียน.accdb ของตนเอง และสะสมงานต่อเนื่องตลอดวิชา'],
-    steps: ['เปิด Microsoft Access เลือก Blank database ตั้งชื่อ Library_รหัสนักเรียน.accdb แล้วกด Create', 'สร้างโฟลเดอร์เก็บไฟล์ ใบงาน และภาพหลักฐาน โดยบันทึกไฟล์ลงพื้นที่ที่เขียนได้', 'ตรวจว่าเปิดไฟล์ได้ ปิด Access แล้วสำรองไฟล์ก่อนเริ่มสัปดาห์ถัดไป'],
-    evidence: 'ไฟล์ฐานข้อมูลเปล่าและภาพชื่อไฟล์ที่เปิดใน Access',
-    assessment: 'ครูตรวจชื่อไฟล์ ตำแหน่งจัดเก็บ และการเปิดไฟล์ได้จริงผ่านช่องทางส่งงานที่กำหนด',
-    question: 'วัตถุใดใน Access ใช้เก็บข้อมูลเป็นแถวและคอลัมน์?',
-    options: ['Form', 'Report', 'Macro', 'Table'], correctIndex: 3,
-  },
+  "title": "ขั้นตอนพัฒนาฐานข้อมูล DBMS และ MySQL Workbench",
+  "knowledge": "อธิบายขั้นตอนพัฒนาฐานข้อมูล DBMS และ MySQL Workbenchและเลือกใช้ได้อย่างถูกต้อง",
+  "skill": "ปฏิบัติงานเรื่องขั้นตอนพัฒนาฐานข้อมูล DBMS และ MySQL Workbenchด้วย MySQL Workbench ได้",
+  "lessons": [
+    "DBMS จัดการฐานข้อมูล ส่วน Workbench เป็นเครื่องมือเชื่อมต่อ MySQL Server; ต้องมี Server และบัญชีสำหรับฝึกแยกต่างหาก"
+  ],
+  "steps": [
+    "ติดตั้ง MySQL Server และ Workbench เชื่อมต่อ localhost แล้วทดสอบ SELECT VERSION();",
+    "บันทึกคำสั่ง SQL ผลลัพธ์ และอธิบายเหตุผลประกอบชิ้นงาน"
+  ],
+  "evidence": "ผลการเชื่อมต่อและภาพเวอร์ชัน Server",
+  "assessment": "ครูตรวจความถูกต้องของคำสั่ง ผลการทดสอบ และคำอธิบายตามรูบริค; แบบฝึกในเกมใช้ทบทวนความรู้",
+  "question": "Workbench มีหน้าที่ใด?",
+  "options": [
+    "เครื่องมือเชื่อมต่อและจัดการ MySQL",
+    "ไฟล์ฐานข้อมูล .accdb",
+    "ระบบปฏิบัติการ",
+    "เครื่องพิมพ์"
+  ],
+  "correctIndex": 0
+},
   {
-    title: 'ตาราง ชนิดข้อมูล และ Primary Key',
-    knowledge: 'อธิบายชนิดข้อมูลและความสำคัญของคีย์หลักได้',
-    skill: 'สร้างตาราง กำหนดชนิดข้อมูล และคีย์หลักใน Access ได้',
-    lessons: ['Members: MemberID เป็น AutoNumber และคีย์หลัก; FullName เป็น Short Text; Phone เป็น Short Text เพื่อเก็บเลขศูนย์นำหน้า', 'Books: BookID เป็น AutoNumber และคีย์หลัก; Title เป็น Short Text; Category เป็น Short Text; Price เป็น Currency', 'Loans: LoanID เป็น AutoNumber และคีย์หลัก; MemberID/BookID เป็น Number ขนาด Long Integer; LoanDate/DueDate/ReturnDate เป็น Date/Time', 'คีย์หลักต้องไม่ซ้ำและไม่เป็น Null ส่วน Foreign Key ใช้อ้างถึงแถวในอีกตาราง'],
-    steps: ['ใช้ Create > Table Design สร้าง Members, Books และ Loans ตาม ERD', 'ตั้ง Primary Key ที่ MemberID, BookID และ LoanID ของแต่ละตาราง', 'ตั้ง MemberID และ BookID ใน Loans เป็น Number โดย Field Size = Long Integer แล้วบันทึกตาราง'],
-    evidence: 'ไฟล์ .accdb และภาพ Design View ของทั้งสามตาราง',
-    assessment: 'รูบริค: ฟิลด์ครบ ชนิดข้อมูลตรงงาน คีย์หลักถูกต้อง และขนาด Foreign Key สอดคล้อง',
-    question: 'ฟิลด์ใดเหมาะกับหมายเลขโทรศัพท์ที่มีเลขศูนย์นำหน้า?',
-    options: ['Short Text', 'AutoNumber', 'Currency', 'Yes/No'], correctIndex: 0,
-  },
+  "title": "สร้างฐานข้อมูลและตารางด้วย SQL",
+  "knowledge": "อธิบายสร้างฐานข้อมูลและตารางด้วย SQLและเลือกใช้ได้อย่างถูกต้อง",
+  "skill": "ปฏิบัติงานเรื่องสร้างฐานข้อมูลและตารางด้วย SQLด้วย MySQL Workbench ได้",
+  "lessons": [
+    "CREATE DATABASE สร้างฐานข้อมูล; USE เลือกฐานข้อมูล; CREATE TABLE กำหนดโครงสร้างตาราง"
+  ],
+  "steps": [
+    "รัน CREATE DATABASE library; USE library; CREATE TABLE Members (MemberID INT PRIMARY KEY, FullName VARCHAR(100)); แล้วตรวจด้วย DESCRIBE Members;",
+    "บันทึกคำสั่ง SQL ผลลัพธ์ และอธิบายเหตุผลประกอบชิ้นงาน"
+  ],
+  "evidence": "ไฟล์ SQL สร้างฐานข้อมูลและผล DESCRIBE",
+  "assessment": "ครูตรวจความถูกต้องของคำสั่ง ผลการทดสอบ และคำอธิบายตามรูบริค; แบบฝึกในเกมใช้ทบทวนความรู้",
+  "question": "คำสั่งใดสร้างตาราง?",
+  "options": [
+    "CREATE TABLE",
+    "SELECT",
+    "DELETE",
+    "UPDATE"
+  ],
+  "correctIndex": 0
+},
   {
-    title: 'Lookup และการแก้โครงสร้างตาราง',
-    knowledge: 'อธิบายรายการเลือกและขั้นตอนแก้โครงสร้างตารางได้',
-    skill: 'กำหนด Lookup Wizard และแก้โครงสร้างตารางได้',
-    lessons: ['Lookup ช่วยเลือกค่าจากรายการหรือตารางอื่น ค่าที่แสดงอาจต่างจากค่าที่บันทึกจริง', 'ตัวอย่าง Loans.MemberID แสดงชื่อจาก Members แต่บันทึก MemberID เพื่ออ้างอิงสมาชิก', 'ควรสำรองไฟล์ก่อนเปลี่ยนชนิดหรือขนาดฟิลด์ที่มีข้อมูล เพราะค่าเดิมอาจไม่รองรับโครงสร้างใหม่'],
-    steps: ['ใส่ข้อมูลสมาชิกสมมติ 3 คนใน Members เพื่อใช้เป็นรายการเลือก', 'ใช้ Lookup Wizard ของ Loans.MemberID เลือกค่าจาก Members โดยเก็บ MemberID และแสดง FullName', 'กำหนด Books.Category เป็นรายการเลือกประเภทหนังสือ และเพิ่มฟิลด์ Email แบบ Short Text ใน Members'],
-    evidence: 'ไฟล์ .accdb พร้อมภาพรายการเลือกและโครงสร้างฟิลด์ที่เพิ่ม',
-    assessment: 'ครูตรวจว่าค่า MemberID ที่เก็บอ้างถึงสมาชิกถูกคนและฟิลด์ใหม่ใช้งานได้',
-    question: 'Lookup ของชื่อสมาชิกใน Loans ควรเก็บค่าใดเพื่ออ้างอิง Members?',
-    options: ['ชื่อที่พิมพ์ซ้ำทุกครั้ง', 'MemberID', 'เบอร์โทรครู', 'ลำดับหน้ารายงาน'], correctIndex: 1,
-  },
+  "title": "ชนิดข้อมูล คีย์หลัก และคีย์นอก",
+  "knowledge": "อธิบายชนิดข้อมูล คีย์หลัก และคีย์นอกและเลือกใช้ได้อย่างถูกต้อง",
+  "skill": "ปฏิบัติงานเรื่องชนิดข้อมูล คีย์หลัก และคีย์นอกด้วย MySQL Workbench ได้",
+  "lessons": [
+    "ใช้ INT สำหรับรหัสตัวเลข VARCHAR สำหรับข้อความ DATE สำหรับวันที่ และ DECIMAL สำหรับราคา; PRIMARY KEY ไม่ซ้ำและไม่เป็น NULL ส่วน FOREIGN KEY อ้างอิงตารางแม่"
+  ],
+  "steps": [
+    "สร้าง Books และ Loans ตาม ERD โดยกำหนด LoanID เป็น PRIMARY KEY และ MemberID/BookID เป็น FOREIGN KEY; ทดลองเพิ่มรหัสสมาชิกที่ไม่มีในตารางแม่",
+    "บันทึกคำสั่ง SQL ผลลัพธ์ และอธิบายเหตุผลประกอบชิ้นงาน"
+  ],
+  "evidence": "DDL ของทุกตารางและผลทดสอบข้อจำกัด",
+  "assessment": "ครูตรวจความถูกต้องของคำสั่ง ผลการทดสอบ และคำอธิบายตามรูบริค; แบบฝึกในเกมใช้ทบทวนความรู้",
+  "question": "คีย์ใดอ้างอิงข้อมูลในตารางอื่น?",
+  "options": [
+    "FOREIGN KEY",
+    "ORDER BY",
+    "VARCHAR",
+    "COUNT"
+  ],
+  "correctIndex": 0
+},
   {
-    title: 'Field Properties และการป้อนข้อมูล',
-    knowledge: 'อธิบายคุณสมบัติฟิลด์ รูปแบบป้อนข้อมูล และ Validation Rule ได้',
-    skill: 'กำหนดคุณสมบัติและป้อนข้อมูลทดสอบใน Datasheet View ได้',
-    lessons: ['Required กำหนดว่าต้องมีค่า; Field Size จำกัดขนาด; Format จัดรูปแบบแสดงผล; Input Mask กำหนดรูปแบบการป้อน', 'ตั้ง Books.Price Validation Rule เป็น >=0 และ Validation Text ให้ผู้ใช้เข้าใจเมื่อกรอกผิด', 'กฎเปรียบเทียบหลายฟิลด์ เช่น [DueDate]>=[LoanDate] ต้องกำหนดเป็นกฎระดับระเบียนของตาราง Loans'],
-    steps: ['ตั้ง FullName และ Title เป็น Required พร้อมกำหนด Field Size ที่เหมาะสม', 'ทดลอง Input Mask สำหรับ Phone ตามรูปแบบหมายเลขที่กำหนดในชั้นเรียน', 'ตั้งกฎราคาและวันครบกำหนด แล้วป้อนสมาชิก 5 คน หนังสือ 10 เล่ม และรายการยืม 10 รายการด้วยข้อมูลสมมติ', 'ทดลองทั้งค่าที่ผ่านและไม่ผ่านกฎ พร้อมบันทึกผล'],
-    evidence: 'ไฟล์ .accdb และบันทึกการทดสอบค่าถูก/ผิดพร้อมภาพข้อความแจ้งเตือน',
-    assessment: 'ครูตรวจว่ารับข้อมูลถูกต้อง ปฏิเสธข้อมูลผิด และอธิบายเหตุผลได้',
-    question: 'ต้องการห้ามราคาหนังสือติดลบ ควรใช้คุณสมบัติใด?',
-    options: ['Caption อย่างเดียว', 'Format อย่างเดียว', 'Validation Rule >=0', 'เรียงลำดับจากมากไปน้อย'], correctIndex: 2,
-  },
+  "title": "เพิ่ม ลบ และแก้ไขข้อมูลด้วย SQL",
+  "knowledge": "อธิบายเพิ่ม ลบ และแก้ไขข้อมูลด้วย SQLและเลือกใช้ได้อย่างถูกต้อง",
+  "skill": "ปฏิบัติงานเรื่องเพิ่ม ลบ และแก้ไขข้อมูลด้วย SQLด้วย MySQL Workbench ได้",
+  "lessons": [
+    "INSERT เพิ่มแถว UPDATE แก้ไข และ DELETE ลบ; ตรวจ WHERE ด้วย SELECT ก่อนแก้ไขหรือลบข้อมูล"
+  ],
+  "steps": [
+    "เพิ่มข้อมูลสมมติใน Members และ Books; ใช้ UPDATE Members SET FullName = 'สมชาย' WHERE MemberID = 1; แล้วตรวจผล; ทดลอง DELETE เฉพาะข้อมูลฝึก",
+    "บันทึกคำสั่ง SQL ผลลัพธ์ และอธิบายเหตุผลประกอบชิ้นงาน"
+  ],
+  "evidence": "สคริปต์ DML และผลก่อน/หลังแก้ไข",
+  "assessment": "ครูตรวจความถูกต้องของคำสั่ง ผลการทดสอบ และคำอธิบายตามรูบริค; แบบฝึกในเกมใช้ทบทวนความรู้",
+  "question": "คำสั่งใดแก้ไขข้อมูลเดิม?",
+  "options": [
+    "UPDATE",
+    "CREATE DATABASE",
+    "SELECT",
+    "SHOW TABLES"
+  ],
+  "correctIndex": 0
+},
   {
-    title: 'Relationships และความสมบูรณ์ของข้อมูล',
-    knowledge: 'อธิบายประเภทความสัมพันธ์และ Referential Integrity ได้',
-    skill: 'เชื่อมความสัมพันธ์ของตารางในโครงงานได้',
-    lessons: ['ใช้ Database Tools > Relationships เชื่อมคีย์หลักกับ Foreign Key ที่ชนิดข้อมูลเข้ากัน', 'Referential Integrity ช่วยป้องกันการอ้างถึงสมาชิกหรือหนังสือที่ไม่มีอยู่', 'การลบแบบ Cascade Delete อาจลบประวัติการยืมตามข้อมูลแม่ จึงต้องเลือกตามกฎธุรกิจ'],
-    steps: ['ตรวจความสัมพันธ์ที่ Lookup Wizard อาจสร้างไว้แล้ว', 'เชื่อม Members.MemberID กับ Loans.MemberID และ Books.BookID กับ Loans.BookID พร้อม Enforce Referential Integrity', 'ตั้ง MemberID/BookID ของ Loans เป็น Required และทดสอบกรอก ID ที่ไม่มีอยู่ โดยไม่เปิด Cascade Delete สำหรับประวัติการยืม'],
-    evidence: 'ไฟล์ .accdb ภาพ Relationships และผลทดสอบ Foreign Key ที่ไม่ถูกต้อง',
-    assessment: 'ครูตรวจทั้งความสัมพันธ์ 1–หลายและการป้องกันรายการที่ไม่มีข้อมูลแม่',
-    question: 'Referential Integrity ช่วยป้องกันกรณีใด?',
-    options: ['ชื่อรายงานยาว', 'ฟอร์มสีไม่ตรงกัน', 'ข้อมูลเรียงตามวันที่', 'รายการยืมอ้างถึงสมาชิกที่ไม่มีอยู่'], correctIndex: 3,
-  },
+  "title": "สร้างความสัมพันธ์ระหว่างตาราง",
+  "knowledge": "อธิบายสร้างความสัมพันธ์ระหว่างตารางและเลือกใช้ได้อย่างถูกต้อง",
+  "skill": "ปฏิบัติงานเรื่องสร้างความสัมพันธ์ระหว่างตารางด้วย MySQL Workbench ได้",
+  "lessons": [
+    "ความสัมพันธ์หนึ่งต่อหลายใช้คีย์นอกในฝั่งหลาย; หลายต่อหลายใช้ตารางเชื่อม; Referential Integrity ป้องกันข้อมูลอ้างอิงที่ไม่มีอยู่จริง"
+  ],
+  "steps": [
+    "สร้าง Members 1–หลาย Loans และ Books 1–หลาย Loans; ทดสอบการเพิ่มรายการยืมและการลบแถวแม่ที่ยังถูกอ้างอิง",
+    "บันทึกคำสั่ง SQL ผลลัพธ์ และอธิบายเหตุผลประกอบชิ้นงาน"
+  ],
+  "evidence": "ERD และผลทดสอบความสัมพันธ์",
+  "assessment": "ครูตรวจความถูกต้องของคำสั่ง ผลการทดสอบ และคำอธิบายตามรูบริค; แบบฝึกในเกมใช้ทบทวนความรู้",
+  "question": "ตารางใดเชื่อมสมาชิกกับหนังสือที่ยืม?",
+  "options": [
+    "Loans",
+    "สีหน้าจอ",
+    "ชื่อไฟล์",
+    "รหัสผ่าน"
+  ],
+  "correctIndex": 0
+},
   {
-    title: 'Select Query',
-    knowledge: 'อธิบายความหมายและประโยชน์ของ Query ได้',
-    skill: 'สร้าง Select Query เพื่อเลือกข้อมูลตามเงื่อนไขได้',
-    lessons: ['Select Query ใช้เลือกฟิลด์ เชื่อมตาราง กรองเงื่อนไข และเรียงข้อมูลโดยไม่แก้ข้อมูลต้นทาง', 'รายการค้างคืนหาได้จาก ReturnDate Is Null ส่วนรายการเกินกำหนดเพิ่มเงื่อนไข DueDate < Date()', 'Query Design แสดงตารางและเส้นเชื่อม พร้อมช่อง Field, Sort และ Criteria'],
-    steps: ['ใช้ Create > Query Design เพิ่ม Members, Books และ Loans แล้วตรวจเส้นเชื่อม', 'เลือก FullName, Title, LoanDate, DueDate และ ReturnDate', 'ตั้ง ReturnDate Criteria = Is Null และ DueDate Criteria = <Date() ในแถวเดียวกัน บันทึกชื่อ qryOverdue', 'เตรียมรายการเกินกำหนดที่ยังไม่คืนและรายการคืนแล้ว เพื่อเทียบผลลัพธ์กับข้อมูลต้นทาง'],
-    evidence: 'ไฟล์ .accdb พร้อม qryOverdue และภาพผลลัพธ์ที่ตรวจเทียบแล้ว',
-    assessment: 'รูบริค: เชื่อมตารางถูก เลือกฟิลด์ครบ เงื่อนไขตรงโจทย์ และผลลัพธ์ถูกต้อง',
-    question: 'เงื่อนไขใดเลือกเฉพาะรายการที่ยังไม่คืน?',
-    options: ['ReturnDate = 0', 'ReturnDate Is Null', 'ReturnDate > 100', 'ReturnDate = MemberID'], correctIndex: 1,
-  },
+  "title": "สืบค้นข้อมูลด้วย SELECT และ WHERE",
+  "knowledge": "อธิบายสืบค้นข้อมูลด้วย SELECT และ WHEREและเลือกใช้ได้อย่างถูกต้อง",
+  "skill": "ปฏิบัติงานเรื่องสืบค้นข้อมูลด้วย SELECT และ WHEREด้วย MySQL Workbench ได้",
+  "lessons": [
+    "SELECT เลือกคอลัมน์ FROM ระบุตาราง WHERE กรองแถว; ใช้ AND OR LIKE และ ORDER BY เพื่อค้นหาและเรียงข้อมูล"
+  ],
+  "steps": [
+    "รัน SELECT BookID, Title FROM Books WHERE Title LIKE '%SQL%' ORDER BY Title; แล้วเขียนเงื่อนไขเพิ่มเติมอย่างน้อย 3 แบบ",
+    "บันทึกคำสั่ง SQL ผลลัพธ์ และอธิบายเหตุผลประกอบชิ้นงาน"
+  ],
+  "evidence": "คำสั่ง SELECT และผลลัพธ์ 3 เงื่อนไข",
+  "assessment": "ครูตรวจความถูกต้องของคำสั่ง ผลการทดสอบ และคำอธิบายตามรูบริค; แบบฝึกในเกมใช้ทบทวนความรู้",
+  "question": "ส่วนใดใช้กรองแถวข้อมูล?",
+  "options": [
+    "WHERE",
+    "FROM",
+    "CREATE",
+    "PRIMARY KEY"
+  ],
+  "correctIndex": 0
+},
   {
-    title: 'Totals, Parameter และ Action Query',
-    knowledge: 'อธิบายคิวรีสรุปค่า รับพารามิเตอร์ และจัดการข้อมูลได้',
-    skill: 'สร้าง Totals Query และ Parameter Query ที่ใช้งานได้',
-    lessons: ['Totals Query ใช้ Group By ร่วมกับ Count, Sum หรือ Avg เช่น นับ LoanID แยกตาม MemberID', 'Parameter Query รับค่าจากผู้ใช้ ควรกำหนดชนิดพารามิเตอร์ เช่น Long สำหรับรหัสสมาชิก', 'Action Query ได้แก่ Append, Update, Delete และ Make Table ซึ่งมีผลต่อข้อมูลหรือโครงสร้าง ควรทดลองกับสำเนาและตรวจเงื่อนไขก่อนรัน'],
-    steps: ['สร้าง qryLoanTotals จัดกลุ่ม MemberID และนับ LoanID แล้วเทียบจำนวนด้วยตนเอง', 'สร้าง qryLoansByMember โดยใช้พารามิเตอร์ [กรอกรหัสสมาชิก] และกำหนดชนิด Long', 'คัดลอกไฟล์เพื่อทดลอง Update Query ตามเงื่อนไขที่ครูกำหนด ตรวจรายการเป้าหมายด้วย Select ก่อนและเทียบหลังรัน', 'ทบทวนประเภทคิวรีผ่าน Blooket ตามกิจกรรมของครู'],
-    evidence: 'ไฟล์ที่มีคิวรีสรุปและรับค่า พร้อมบันทึกการทดลอง Action Query บนสำเนา',
-    assessment: 'ครูตรวจผลนับ พารามิเตอร์ และจำนวนแถวที่เปลี่ยนตรงเงื่อนไข',
-    question: 'ต้องการนับจำนวนครั้งที่ยืมแยกตามสมาชิก ควรใช้วิธีใด?',
-    options: ['Delete ทุกแถว', 'เรียงชื่ออย่างเดียว', 'Group By MemberID และ Count LoanID', 'เปลี่ยนทุกฟิลด์เป็นข้อความ'], correctIndex: 2,
-  },
+  "title": "ฟังก์ชันคำนวณและจัดกลุ่มข้อมูล",
+  "knowledge": "อธิบายฟังก์ชันคำนวณและจัดกลุ่มข้อมูลและเลือกใช้ได้อย่างถูกต้อง",
+  "skill": "ปฏิบัติงานเรื่องฟังก์ชันคำนวณและจัดกลุ่มข้อมูลด้วย MySQL Workbench ได้",
+  "lessons": [
+    "COUNT SUM AVG MIN MAX คำนวณสรุป; GROUP BY จัดกลุ่ม; WHERE กรองก่อนจัดกลุ่ม ส่วน HAVING กรองผลกลุ่ม"
+  ],
+  "steps": [
+    "รัน SELECT MemberID, COUNT(*) AS TotalLoans FROM Loans GROUP BY MemberID HAVING COUNT(*) > 1; และฝึก SUM/AVG จากราคาหนังสือ",
+    "บันทึกคำสั่ง SQL ผลลัพธ์ และอธิบายเหตุผลประกอบชิ้นงาน"
+  ],
+  "evidence": "SQL สรุปข้อมูลและคำอธิบาย WHERE/HAVING",
+  "assessment": "ครูตรวจความถูกต้องของคำสั่ง ผลการทดสอบ และคำอธิบายตามรูบริค; แบบฝึกในเกมใช้ทบทวนความรู้",
+  "question": "คำสั่งใดกรองผลหลังจัดกลุ่ม?",
+  "options": [
+    "HAVING",
+    "INSERT",
+    "DROP",
+    "USE"
+  ],
+  "correctIndex": 0
+},
   {
-    title: 'สร้างฟอร์มพื้นฐาน',
-    knowledge: 'อธิบายหลักการออกแบบส่วนติดต่อและวิธีสร้างฟอร์มได้',
-    skill: 'สร้างฟอร์มบันทึกข้อมูลด้วยเครื่องมืออัตโนมัติได้',
-    lessons: ['Form เป็นหน้าจอดู เพิ่ม และแก้ไขข้อมูล โดย Record Source กำหนดตารางหรือคิวรีต้นทาง', 'สร้างฟอร์มได้ด้วย Form อัตโนมัติ, Form Wizard หรือ Blank Form แล้วเพิ่มคอนโทรล', 'ป้ายชื่อ ลำดับการกด Tab และขนาดช่องกรอกควรช่วยให้ผู้ใช้ป้อนข้อมูลได้สะดวก'],
-    steps: ['เลือก Members แล้วใช้ Create > Form บันทึกเป็น frmMembers', 'ใช้ Form Wizard สร้าง frmBooks และทดลอง Blank Form เพื่อเปรียบเทียบวิธี', 'เพิ่มและแก้ไขข้อมูลสมมติผ่านฟอร์ม แล้วเปิดตารางเพื่อตรวจผล'],
-    evidence: 'ไฟล์ .accdb พร้อม frmMembers/frmBooks และภาพการทดสอบบันทึกข้อมูล',
-    assessment: 'ครูตรวจแหล่งข้อมูล การบันทึกจริง ความอ่านง่าย และลำดับช่องกรอก',
-    question: 'คุณสมบัติใดกำหนดตารางหรือคิวรีต้นทางของฟอร์ม?',
-    options: ['Border Color', 'Caption อย่างเดียว', 'Font Size', 'Record Source'], correctIndex: 3,
-  },
+  "title": "สืบค้นหลายตารางด้วย Joins",
+  "knowledge": "อธิบายสืบค้นหลายตารางด้วย Joinsและเลือกใช้ได้อย่างถูกต้อง",
+  "skill": "ปฏิบัติงานเรื่องสืบค้นหลายตารางด้วย Joinsด้วย MySQL Workbench ได้",
+  "lessons": [
+    "INNER JOIN คืนแถวที่จับคู่ได้; LEFT JOIN คงแถวทั้งหมดของตารางซ้าย; ระบุ ON ตามคีย์เพื่อหลีกเลี่ยงการจับคู่ผิด"
+  ],
+  "steps": [
+    "เขียน SELECT m.FullName, b.Title FROM Loans l JOIN Members m ON m.MemberID = l.MemberID JOIN Books b ON b.BookID = l.BookID; เปรียบเทียบ INNER กับ LEFT JOIN",
+    "บันทึกคำสั่ง SQL ผลลัพธ์ และอธิบายเหตุผลประกอบชิ้นงาน"
+  ],
+  "evidence": "SQL เชื่อม 3 ตารางและผลเปรียบเทียบ",
+  "assessment": "ครูตรวจความถูกต้องของคำสั่ง ผลการทดสอบ และคำอธิบายตามรูบริค; แบบฝึกในเกมใช้ทบทวนความรู้",
+  "question": "JOIN ใช้ ON เพื่ออะไร?",
+  "options": [
+    "กำหนดเงื่อนไขจับคู่แถว",
+    "ลบฐานข้อมูล",
+    "สร้างผู้ใช้",
+    "เข้ารหัสไฟล์"
+  ],
+  "correctIndex": 0
+},
   {
-    title: 'คอนโทรลและ Subform',
-    knowledge: 'อธิบายหน้าที่คอนโทรลและประโยชน์ของ Subform ได้',
-    skill: 'เพิ่มปุ่ม ปรับแต่งฟอร์ม และเชื่อมฟอร์มย่อยได้',
-    lessons: ['Text Box แสดงหรือรับค่า Combo Box ช่วยเลือก และ Command Button เรียกคำสั่ง', 'ฟอร์มหลักสมาชิกกับฟอร์มย่อยรายการยืมเหมาะกับความสัมพันธ์หนึ่งต่อหลาย', 'Link Master Fields และ Link Child Fields ใช้ MemberID เพื่อให้ฟอร์มย่อยแสดงเฉพาะการยืมของสมาชิกปัจจุบัน'],
-    steps: ['ใช้ Form Wizard สร้าง frmMemberLoans จาก Members และ Loans แบบฟอร์มหลัก/ฟอร์มย่อย', 'ตรวจ Link Master Fields และ Link Child Fields ให้ใช้ MemberID', 'เพิ่มปุ่มปิดฟอร์มและปรับ Tab Order แล้วสลับสมาชิกอย่างน้อย 2 คนเพื่อตรวจรายการยืม'],
-    evidence: 'ไฟล์ .accdb พร้อม Form/Subform และภาพผลของสมาชิกต่างคน',
-    assessment: 'รูบริค: เชื่อมถูกคน คอนโทรลทำงาน บันทึกข้อมูลได้ และจัดหน้าอ่านง่าย',
-    question: 'ต้องการให้ฟอร์มย่อยแสดงการยืมเฉพาะสมาชิกปัจจุบัน ควรเชื่อมด้วยอะไร?',
-    options: ['MemberID ในฟอร์มหลักและฟอร์มย่อย', 'สีพื้นหลัง', 'ชื่อฟอร์มที่เหมือนกัน', 'ขนาดตัวอักษร'], correctIndex: 0,
-  },
+  "title": "Subquery และ Nested Queries",
+  "knowledge": "อธิบายSubquery และ Nested Queriesและเลือกใช้ได้อย่างถูกต้อง",
+  "skill": "ปฏิบัติงานเรื่องSubquery และ Nested Queriesด้วย MySQL Workbench ได้",
+  "lessons": [
+    "Subquery คือคำสั่งค้นหาภายในอีกคำสั่ง; ใช้ IN EXISTS หรือการเปรียบเทียบกับค่าผลรวม โดยตรวจจำนวนแถวที่คืนให้เหมาะกับตัวดำเนินการ"
+  ],
+  "steps": [
+    "ค้นหาหนังสือราคาสูงกว่าค่าเฉลี่ยด้วย SELECT * FROM Books WHERE Price > (SELECT AVG(Price) FROM Books); ฝึก IN เพื่อค้นหาสมาชิกที่เคยยืม",
+    "บันทึกคำสั่ง SQL ผลลัพธ์ และอธิบายเหตุผลประกอบชิ้นงาน"
+  ],
+  "evidence": "SQL Subquery อย่างน้อย 2 รูปแบบ",
+  "assessment": "ครูตรวจความถูกต้องของคำสั่ง ผลการทดสอบ และคำอธิบายตามรูบริค; แบบฝึกในเกมใช้ทบทวนความรู้",
+  "question": "Subquery หมายถึงอะไร?",
+  "options": [
+    "คำสั่งค้นหาซ้อนในคำสั่งอื่น",
+    "การสำรองไฟล์",
+    "คีย์หลัก",
+    "ชนิดวันที่"
+  ],
+  "correctIndex": 0
+},
   {
-    title: 'Split Form และคอนโทรลช่วยใช้งาน',
-    knowledge: 'อธิบายลักษณะ Split Form และคอนโทรลที่เกี่ยวข้องได้',
-    skill: 'สร้าง Split Form และใช้คอนโทรลช่วยค้นหา/เลือกข้อมูลได้',
-    lessons: ['Split Form แสดงมุมมองฟอร์มและ Datasheet ของข้อมูลชุดเดียวกันพร้อมกัน', 'เมื่อเลือกแถวใน Datasheet ส่วนฟอร์มแสดงระเบียนเดียวกัน ทำให้ค้นและแก้ข้อมูลสะดวก', 'Combo Box และปุ่มคำสั่งต้องทดสอบทั้งกรณีมีข้อมูลและไม่พบรายการ'],
-    steps: ['เลือก Books แล้วใช้ Create > More Forms > Split Form บันทึกเป็น frmBooksSplit', 'เพิ่ม Combo Box สำหรับค้นหาเล่มหนังสือด้วยตัวช่วย และปุ่มปิดฟอร์ม', 'เลือกแถว สลับระเบียน ทดลองค้นหา และตรวจว่าทั้งสองส่วนแสดงหนังสือเล่มเดียวกัน'],
-    evidence: 'ไฟล์ .accdb และบันทึกทดสอบการเลือกแถว/ค้นหาด้วยคอนโทรล',
-    assessment: 'ครูตรวจการทำงานสัมพันธ์กันของสองมุมมองและผลการค้นหา',
-    question: 'Split Form แสดงส่วนใดพร้อมกัน?',
-    options: ['รายงานสองไฟล์', 'Form และ Datasheet ของข้อมูลชุดเดียวกัน', 'ERD กับไฟล์เสียง', 'ตารางที่ไม่เกี่ยวข้องกันเสมอ'], correctIndex: 1,
-  },
+  "title": "Views และ Indexes เพื่อเพิ่มประสิทธิภาพ",
+  "knowledge": "อธิบายViews และ Indexes เพื่อเพิ่มประสิทธิภาพและเลือกใช้ได้อย่างถูกต้อง",
+  "skill": "ปฏิบัติงานเรื่องViews และ Indexes เพื่อเพิ่มประสิทธิภาพด้วย MySQL Workbench ได้",
+  "lessons": [
+    "VIEW เก็บนิยามคำสั่งค้นหา; INDEX ช่วยบางรูปแบบการค้นหาแต่เพิ่มต้นทุนการเขียน; ใช้ EXPLAIN ตรวจแผนการทำงาน"
+  ],
+  "steps": [
+    "สร้าง CREATE VIEW LoanSummary AS SELECT MemberID, COUNT(*) AS TotalLoans FROM Loans GROUP BY MemberID; สร้าง INDEX บน Loans(MemberID) เมื่อยังไม่มีดัชนี แล้วเปรียบเทียบ EXPLAIN",
+    "บันทึกคำสั่ง SQL ผลลัพธ์ และอธิบายเหตุผลประกอบชิ้นงาน"
+  ],
+  "evidence": "SQL ของ View/Index และผล EXPLAIN ก่อน/หลัง",
+  "assessment": "ครูตรวจความถูกต้องของคำสั่ง ผลการทดสอบ และคำอธิบายตามรูบริค; แบบฝึกในเกมใช้ทบทวนความรู้",
+  "question": "เครื่องมือใดใช้ดูแผนการค้นหา?",
+  "options": [
+    "EXPLAIN",
+    "DELETE",
+    "PASSWORD",
+    "INSERT"
+  ],
+  "correctIndex": 0
+},
   {
-    title: 'รายงาน จัดกลุ่ม และเลขลำดับ',
-    knowledge: 'อธิบายองค์ประกอบรายงานและการจัดกลุ่มเพื่อพิมพ์ได้',
-    skill: 'สร้างรายงาน จัดกลุ่ม เรียงลำดับ และใส่เลขลำดับได้',
-    lessons: ['Report ใช้จัดหน้าสำหรับนำเสนอและพิมพ์ โดยสร้างแบบอัตโนมัติ ใช้ Report Wizard หรือปรับใน Design View ได้', 'Group & Sort ใช้จัดกลุ่มตามสมาชิกและเรียงวันครบกำหนดภายในกลุ่ม', 'Text Box ที่ Control Source = =1 และ Running Sum = Over All ใช้ทำเลขลำดับต่อเนื่องในรายงาน'],
-    steps: ['สร้างรายงานอัตโนมัติจาก Books เพื่อเปรียบเทียบกับ Report Wizard', 'ใช้ Report Wizard สร้าง rptOverdue จาก qryOverdue จัดกลุ่มสมาชิกและเรียง DueDate', 'เพิ่มเลขลำดับและจำนวนรายการ ตรวจ Print Preview ให้หัวตารางและข้อมูลไม่ถูกตัด'],
-    evidence: 'ไฟล์ .accdb พร้อม rptOverdue และรายงานที่ส่งออกเป็น PDF',
-    assessment: 'รูบริค: ข้อมูลตรงคิวรี กลุ่ม/ลำดับถูก เลขลำดับต่อเนื่อง และพิมพ์อ่านได้',
-    question: 'ต้องการเลขลำดับต่อเนื่องทุกแถวในรายงาน ควรตั้ง Running Sum เป็นอะไร?',
-    options: ['No', 'Over Group เท่านั้น', 'Over All', 'Required'], correctIndex: 2,
-  },
+  "title": "Stored Procedures และ Triggers",
+  "knowledge": "อธิบายStored Procedures และ Triggersและเลือกใช้ได้อย่างถูกต้อง",
+  "skill": "ปฏิบัติงานเรื่องStored Procedures และ Triggersด้วย MySQL Workbench ได้",
+  "lessons": [
+    "Stored Procedure เรียกใช้ด้วย CALL; Trigger ทำงานอัตโนมัติตามเหตุการณ์ INSERT UPDATE DELETE; ต้องทดสอบผลข้างเคียง"
+  ],
+  "steps": [
+    "สร้าง Procedure สำหรับค้นหาประวัติยืมตาม MemberID และ Trigger บันทึกการเพิ่ม Loans ลงตาราง AuditLog; ทดสอบ CALL และการเพิ่มรายการใหม่",
+    "บันทึกคำสั่ง SQL ผลลัพธ์ และอธิบายเหตุผลประกอบชิ้นงาน"
+  ],
+  "evidence": "SQL Procedure/Trigger และหลักฐาน AuditLog",
+  "assessment": "ครูตรวจความถูกต้องของคำสั่ง ผลการทดสอบ และคำอธิบายตามรูบริค; แบบฝึกในเกมใช้ทบทวนความรู้",
+  "question": "Trigger ทำงานเมื่อใด?",
+  "options": [
+    "เมื่อเกิดเหตุการณ์ที่กำหนดกับตาราง",
+    "เมื่อปิดจอ",
+    "เฉพาะตอน CALL เสมอ",
+    "เมื่อเปลี่ยนชื่อไฟล์"
+  ],
+  "correctIndex": 0
+},
   {
-    title: 'แผนภูมิ ป้ายผนึก และ Macro',
-    knowledge: 'อธิบายการทำงานของ Macro เงื่อนไข และกลุ่มคำสั่งได้',
-    skill: 'สร้างแผนภูมิและ Macro ควบคุมการเปิด/ปิดฟอร์มหรือรายงานได้',
-    lessons: ['แผนภูมิช่วยเปรียบเทียบยอดสรุป ควรใช้คิวรีที่รวมข้อมูลแล้วและตรวจยอดกับตาราง', 'Label Wizard ใช้ออกแบบป้ายผนึก เช่น ป้ายรหัสและชื่อหนังสือ', 'Macro ใช้คำสั่ง เช่น OpenForm, OpenReport และ CloseWindow; If กำหนดเงื่อนไข และ Submacro ใช้แบ่งชุดคำสั่งที่เรียกใช้ได้'],
-    steps: ['สร้างแผนภูมิจำนวนการยืมจาก qryLoanTotals ในรายงานและตรวจค่าที่แสดง', 'ใช้ Label Wizard สร้างป้าย BookID/Title และตรวจตัวอย่างก่อนพิมพ์', 'สร้าง Macro หรือ Submacro เปิดฟอร์ม/รายงานและปิดหน้าต่าง ผูกกับปุ่มแล้วทดสอบ', 'เพิ่มเงื่อนไข If เพื่อแจ้งเมื่อไม่มีรายการค้างคืน และทดสอบทั้งกรณีมี/ไม่มีข้อมูล'],
-    evidence: 'ไฟล์ .accdb ภาพแผนภูมิ/ป้ายผนึก และผลทดสอบ Macro ทั้งสองเงื่อนไข',
-    assessment: 'ครูตรวจยอดแผนภูมิ ความอ่านง่ายของป้าย และคำสั่งตามเงื่อนไข',
-    question: 'คำสั่งใดใน Macro ใช้เปิดฟอร์ม?',
-    options: ['DeleteObject', 'PrintOut เท่านั้น', 'CloseWindow', 'OpenForm'], correctIndex: 3,
-  },
+  "title": "ผู้ใช้งานและความปลอดภัยฐานข้อมูล",
+  "knowledge": "อธิบายผู้ใช้งานและความปลอดภัยฐานข้อมูลและเลือกใช้ได้อย่างถูกต้อง",
+  "skill": "ปฏิบัติงานเรื่องผู้ใช้งานและความปลอดภัยฐานข้อมูลด้วย MySQL Workbench ได้",
+  "lessons": [
+    "แยกบัญชีผู้ดูแลกับผู้ใช้; ให้สิทธิ์เท่าที่จำเป็นด้วย GRANT และถอนด้วย REVOKE; สำรองและทดลองกู้คืนข้อมูล"
+  ],
+  "steps": [
+    "ให้ครูจัดบัญชีทดลอง; ฝึก CREATE USER และ GRANT SELECT ON library.* ให้บัญชีอ่านอย่างเดียว ตรวจ SHOW GRANTS และทดสอบว่างานเขียนถูกปฏิเสธ; สำรองและกู้คืนฐานข้อมูลฝึก",
+    "บันทึกคำสั่ง SQL ผลลัพธ์ และอธิบายเหตุผลประกอบชิ้นงาน"
+  ],
+  "evidence": "ผลทดสอบสิทธิ์และบันทึกสำรอง/กู้คืน โดยไม่ส่งรหัสผ่าน",
+  "assessment": "ครูตรวจความถูกต้องของคำสั่ง ผลการทดสอบ และคำอธิบายตามรูบริค; แบบฝึกในเกมใช้ทบทวนความรู้",
+  "question": "บัญชีอ่านรายงานควรได้สิทธิ์ใด?",
+  "options": [
+    "SELECT เท่าที่จำเป็น",
+    "ALL ทุกฐานข้อมูล",
+    "สิทธิ์ผู้ดูแลเสมอ",
+    "สิทธิ์ลบทุกตาราง"
+  ],
+  "correctIndex": 0
+},
   {
-    title: 'Switchboard ค่าเริ่มต้น และส่งโครงงาน',
-    knowledge: 'อธิบายเมนูหลัก ค่าเริ่มต้น และการดูแลความปลอดภัยได้',
-    skill: 'สร้าง Switchboard และรวมโครงงานพร้อมใช้งานได้',
-    lessons: ['Switchboard เป็นเมนูเรียกฟอร์ม รายงาน และคำสั่งของระบบ โดยใช้ Switchboard Manager สร้างรายการเมนู', 'กำหนด Display Form ในตัวเลือก Current Database เพื่อเปิดเมนูหลักเมื่อเริ่มใช้งาน และเปิดไฟล์ใหม่เพื่อตรวจผล', 'ใช้ข้อมูลสมมติ สำรองไฟล์ และควบคุมสิทธิ์เข้าถึงไฟล์ การซ่อน Navigation Pane อย่างเดียวไม่ใช่การป้องกันข้อมูล'],
-    steps: ['ใช้ Switchboard Manager สร้างเมนูสมาชิก หนังสือ การยืม และรายงาน หากไม่พบคำสั่งให้เพิ่มผ่าน Quick Access Toolbar > All Commands', 'กำหนดฟอร์มเริ่มต้นเป็นเมนูแล้วปิด/เปิดไฟล์ใหม่ ทดสอบทุกปุ่ม', 'สำรองไฟล์ ตรวจงานตามรายการสัปดาห์ 4–15 และจัดทำคู่มือผู้ใช้สั้น ๆ', 'ส่งโครงงานฉบับสมบูรณ์และนำเสนอขั้นตอนใช้งานพร้อมผลทดสอบ'],
-    evidence: 'ไฟล์ Library_รหัสนักเรียน.accdb ฉบับสมบูรณ์ คู่มือ ERD และบันทึกทดสอบ',
-    assessment: 'ครูตรวจระบบตั้งแต่เปิดไฟล์จนสร้างรายงาน ความถูกต้องของข้อมูล และการนำเสนอ',
-    question: 'ข้อใดเหมาะกับการดูแลข้อมูลของโครงงาน?',
-    options: ['สำรองไฟล์และควบคุมสิทธิ์เข้าถึง', 'ซ่อนเมนูอย่างเดียวแล้วถือว่าปลอดภัย', 'แจกไฟล์ข้อมูลจริงให้ทุกคน', 'ลบสำเนาทั้งหมดก่อนทดสอบ'], correctIndex: 0,
-  },
+  "title": "พัฒนาฐานข้อมูลฉบับสมบูรณ์และแฟ้มสะสมผลงาน",
+  "knowledge": "อธิบายพัฒนาฐานข้อมูลฉบับสมบูรณ์และแฟ้มสะสมผลงานและเลือกใช้ได้อย่างถูกต้อง",
+  "skill": "ปฏิบัติงานเรื่องพัฒนาฐานข้อมูลฉบับสมบูรณ์และแฟ้มสะสมผลงานด้วย MySQL Workbench ได้",
+  "lessons": [
+    "รวมขั้นตอนวิเคราะห์ ออกแบบ สร้าง ทดสอบ และส่งมอบ; ตรวจโครงสร้าง ความสัมพันธ์ คำสั่งค้นหา และความปลอดภัยตามข้อกำหนด"
+  ],
+  "steps": [
+    "รวม ERD, Data Dictionary, DDL, DML, SELECT, Joins, Subquery, Views, Indexes, Procedures และ Triggers; ทดลองนำเข้า SQL บนฐานข้อมูลเปล่าและนำเสนอระบบ",
+    "บันทึกคำสั่ง SQL ผลลัพธ์ และอธิบายเหตุผลประกอบชิ้นงาน"
+  ],
+  "evidence": "Library_รหัสนักเรียน.sql พร้อม ERD คู่มือ บันทึกทดสอบ และ Portfolio",
+  "assessment": "ครูตรวจความถูกต้องของคำสั่ง ผลการทดสอบ และคำอธิบายตามรูบริค; แบบฝึกในเกมใช้ทบทวนความรู้",
+  "question": "ก่อนส่งโครงงานควรตรวจอะไร?",
+  "options": [
+    "นำเข้า SQL และทดสอบระบบได้จริง",
+    "สีชื่อไฟล์เท่านั้น",
+    "ลบหลักฐานทดสอบ",
+    "ส่งรหัสผ่านผู้ดูแล"
+  ],
+  "correctIndex": 0
+},
 ];
 
 export const CURRICULUM_MAP_NODES = units.map((unit, index) => {
@@ -204,11 +349,13 @@ export const CURRICULUM_MAP_NODES = units.map((unit, index) => {
   const column = row % 2 === 0 ? index % 4 : 3 - index % 4;
   return {
     ...unit,
+    questions: buildUnitQuiz(index, unit),
+    date: COURSE_SCHEDULE[index < 8 ? index : index + 1].date,
     level: index + 1,
     subtitle: unit.title,
-    title: `ACCESS ${String(index + 1).padStart(2, '0')}`,
-    caseName: `สัปดาห์ ${index + 1}: ${unit.title}`,
-    week: `สัปดาห์ ${String(index + 1).padStart(2, '0')}`,
+    title: `SQL ${String(index + 1).padStart(2, '0')}`,
+    caseName: `หน่วยที่ ${index + 1}: ${unit.title}`,
+    week: `สัปดาห์ ${String(index < 8 ? index + 1 : index + 2).padStart(2, '0')}`,
     zone: ['Data Plains', 'Relation Valley', 'Query Heights', 'Citadel Peak'][row],
     icon: '📚',
     x: 285 + column * 340,

@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@12.3.4",
   "scripts": {
-    "predev": "node scripts/local-postgres.cjs",
+    "predev": "node scripts/prepare-dev.cjs",
     "dev": "next dev",
     "build": "next build",
     "start": "node scripts/start-server.cjs",
@@ -20,6 +20,8 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
+    "@neon/config": "^1.9.2",
+    "@neon/env": "^1.6.3",
     "@supabase/supabase-js": "^2.117.3",
     "@vercel/analytics": "1.6.1",
     "class-variance-authority": "^0.7.1",

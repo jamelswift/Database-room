@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Kanit, Press_Start_2P, Share_Tech_Mono } from 'next/font/google'
+import { Kanit } from 'next/font/google'
+import localFont from 'next/font/local'
 import './globals.css'
 import { assetPath, LOCAL_MODE } from '@/lib/deployment'
 
@@ -11,16 +12,16 @@ const kanit = Kanit({
   variable: '--font-kanit',
 })
 
-const shareTechMono = Share_Tech_Mono({
-  subsets: ['latin'],
+const shareTechMono = localFont({
+  src: '../public/fonts/retro/share-tech-mono-latin.woff2',
   weight: '400',
   display: 'swap',
   variable: '--font-share-tech-mono',
   adjustFontFallback: false,
 })
 
-const headingFont = Press_Start_2P({
-  subsets: ['latin'],
+const headingFont = localFont({
+  src: '../public/fonts/retro/press-start-2p-latin.woff2',
   weight: '400',
   display: 'swap',
   variable: '--font-heading',
@@ -29,7 +30,7 @@ const headingFont = Press_Start_2P({
 
 export const metadata: Metadata = {
   title: 'Database City — เกมนักสืบฐานข้อมูล',
-  description: 'เรียนรู้ฐานข้อมูลผ่านภารกิจนักสืบ 16 สัปดาห์',
+  description: 'เรียนรู้ฐานข้อมูลผ่านภารกิจนักสืบ 16 หน่วย 18 สัปดาห์ ด้วย MySQL Workbench',
   generator: 'v0.app',
   icons: {
     icon: [

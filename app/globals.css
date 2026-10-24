@@ -175,6 +175,15 @@ h4.font-retro {
   font-family: var(--font-heading), var(--font-kanit), Tahoma, sans-serif;
 }
 
+.database-city-logo {
+  font-family: var(--font-heading), monospace;
+  font-size: clamp(2rem, 7.5vw, 6rem);
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: 0;
+  font-synthesis: none;
+}
+
 .atlas-scroll {
   background: radial-gradient(ellipse at top, #303b43, #101923 75%);
 }

@@ -1,0 +1,128 @@
+-- Database City | MySQL 8.0+ | UTF-8
+-- ข้อมูลสมมติสำหรับฝึกในเครื่องเท่านั้น
+-- สร้างหรือเริ่มข้อมูลฝึกใหม่เฉพาะ db_city_case14
+-- รันทั้งไฟล์จะล้างตารางฝึกใน schema นี้ ให้สำรองงานที่ทำแล้วก่อน
+CREATE DATABASE IF NOT EXISTS db_city_case14 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE db_city_case14;
+DROP VIEW IF EXISTS vw_sales_summary;
+DROP PROCEDURE IF EXISTS GetProductPrice;
+DROP TABLE IF EXISTS OrderItems;
+DROP TABLE IF EXISTS Orders;
+DROP TABLE IF EXISTS ProductDeleteLog;
+DROP TABLE IF EXISTS Products;
+DROP TABLE IF EXISTS Customers;
+DROP TABLE IF EXISTS Employees;
+DROP TABLE IF EXISTS Sales;
+CREATE TABLE Customers (CustomerID INT PRIMARY KEY, CustomerName VARCHAR(100));
+INSERT INTO Customers VALUES
+(1,'Suda'),
+(2,'Somchai'),
+(3,'Mali'),
+(4,'Siri'),
+(5,'Anan'),
+(6,'Nida');
+CREATE TABLE Products (ProductID INT PRIMARY KEY, ProductName VARCHAR(100), Price DECIMAL(10,2));
+INSERT INTO Products VALUES (1,'Coffee',65),(2,'Tea',50),(3,'Cocoa',60),(4,'Cake',95),(5,'Unused Menu',120);
+CREATE TABLE Orders (OrderID INT PRIMARY KEY, CustomerID INT NOT NULL, OrderDate DATE,
+ FOREIGN KEY(CustomerID) REFERENCES Customers(CustomerID));
+INSERT INTO Orders VALUES (101,1,'2026-12-01'),(102,2,'2026-12-02'),(103,1,'2026-12-03'),(104,3,'2026-12-04');
+CREATE TABLE OrderItems (OrderID INT, ProductID INT, Quantity INT NOT NULL, UnitPrice DECIMAL(10,2) NOT NULL,
+ PRIMARY KEY(OrderID,ProductID), FOREIGN KEY(OrderID) REFERENCES Orders(OrderID), FOREIGN KEY(ProductID) REFERENCES Products(ProductID));
+INSERT INTO OrderItems VALUES (101,1,2,65),(101,2,1,50),(102,3,3,60),(103,4,2,95),(104,1,1,65);
+-- Customers 4, 5, 6 ไม่มีคำสั่งซื้อ เพื่อทดสอบ LEFT JOIN
+CREATE TABLE Employees (EmployeeID INT PRIMARY KEY, FirstName VARCHAR(50), LastName VARCHAR(50), Department VARCHAR(30), Salary DECIMAL(10,2));
+INSERT INTO Employees VALUES
+(1,'Employee01','Family01','Sales',20500),
+(2,'Employee02','Family02','HR',23000),
+(3,'Employee03','Family03','Finance',25500),
+(4,'Employee04','Family04','IT',28000),
+(5,'S05','Family05','Sales',30500),
+(6,'Employee06','Family06','HR',33000),
+(7,'Employee07','Family07','Finance',35500),
+(8,'Employee08','Family08','IT',38000),
+(9,'Employee09','Family09','Sales',40500),
+(10,'S10','Family10','HR',43000),
+(11,'Employee11','Family11','Finance',45500),
+(12,'Employee12','Family12','IT',18000),
+(13,'Employee13','Family13','Sales',20500),
+(14,'Employee14','Family14','HR',23000),
+(15,'S15','Family15','Finance',25500),
+(16,'Employee16','Family16','IT',28000),
+(17,'Employee17','Family17','Sales',30500),
+(18,'Employee18','Family18','HR',33000),
+(19,'Employee19','Family19','Finance',35500),
+(20,'S20','Family20','IT',38000),
+(21,'Employee21','Family21','Sales',40500),
+(22,'Employee22','Family22','HR',43000),
+(23,'Employee23','Family23','Finance',45500),
+(24,'Employee24','Family24','IT',18000),
+(25,'S25','Family25','Sales',20500),
+(26,'Employee26','Family26','HR',23000),
+(27,'Employee27','Family27','Finance',25500),
+(28,'Employee28','Family28','IT',28000),
+(29,'Employee29','Family29','Sales',30500),
+(30,'S30','Family30','HR',33000),
+(31,'Employee31','Family31','Finance',35500),
+(32,'Employee32','Family32','IT',38000),
+(33,'Employee33','Family33','Sales',40500),
+(34,'Employee34','Family34','HR',43000),
+(35,'S35','Family35','Finance',45500),
+(36,'Employee36','Family36','IT',18000),
+(37,'Employee37','Family37','Sales',20500),
+(38,'Employee38','Family38','HR',23000),
+(39,'Employee39','Family39','Finance',25500),
+(40,'S40','Family40','IT',28000),
+(41,'Employee41','Family41','Sales',30500),
+(42,'Employee42','Family42','HR',33000),
+(43,'Employee43','Family43','Finance',35500),
+(44,'Employee44','Family44','IT',38000),
+(45,'S45','Family45','Sales',40500),
+(46,'Employee46','Family46','HR',43000),
+(47,'Employee47','Family47','Finance',45500),
+(48,'Employee48','Family48','IT',18000),
+(49,'Employee49','Family49','Sales',20500),
+(50,'S50','Family50','HR',23000);
+CREATE TABLE Sales (SaleID INT PRIMARY KEY, Branch VARCHAR(30), SaleDate DATE, Amount DECIMAL(12,2));
+INSERT INTO Sales VALUES
+(1,'Central','2026-12-01',1175),
+(2,'South','2026-12-02',1350),
+(3,'North','2026-12-03',1525),
+(4,'Central','2026-12-04',1700),
+(5,'South','2026-12-05',1875),
+(6,'North','2026-12-06',2050),
+(7,'Central','2026-12-07',2225),
+(8,'South','2026-12-08',2400),
+(9,'North','2026-12-09',2575),
+(10,'Central','2026-12-10',2750),
+(11,'South','2026-12-11',2925),
+(12,'North','2026-12-12',3100),
+(13,'Central','2026-12-13',3275),
+(14,'South','2026-12-14',3450),
+(15,'North','2026-12-15',3625),
+(16,'Central','2026-12-16',3800),
+(17,'South','2026-12-17',3975),
+(18,'North','2026-12-18',4150),
+(19,'Central','2026-12-19',4325),
+(20,'South','2026-12-20',4500),
+(21,'North','2026-12-21',4675),
+(22,'Central','2026-12-22',4850),
+(23,'South','2026-12-23',5025),
+(24,'North','2026-12-24',5200);
+CREATE TABLE ProductDeleteLog (
+ LogID INT AUTO_INCREMENT PRIMARY KEY, ProductID INT, ProductName VARCHAR(100), DeletedAt DATETIME NOT NULL
+);
+DELIMITER //
+CREATE PROCEDURE GetProductPrice(IN p_ProductID INT)
+BEGIN
+ SELECT ProductID, ProductName, Price FROM Products WHERE ProductID=p_ProductID;
+END //
+CREATE TRIGGER trg_product_deleted AFTER DELETE ON Products FOR EACH ROW
+BEGIN
+ INSERT INTO ProductDeleteLog(ProductID,ProductName,DeletedAt)
+ VALUES(OLD.ProductID,OLD.ProductName,NOW());
+END //
+DELIMITER ;
+CALL GetProductPrice(1);
+-- ProductID 5 ไม่มี OrderItems อ้างอิง จึงใช้ทดสอบลบได้
+DELETE FROM Products WHERE ProductID=5;
+SELECT * FROM ProductDeleteLog;
