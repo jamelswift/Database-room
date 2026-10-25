@@ -33,21 +33,8 @@ export const metadata: Metadata = {
   description: 'เรียนรู้ฐานข้อมูลผ่านภารกิจนักสืบ 16 หน่วย 18 สัปดาห์ ด้วย MySQL Workbench',
   generator: 'v0.app',
   icons: {
-    icon: [
-      {
-        url: assetPath('/icon-light-32x32.png'),
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: assetPath('/icon-dark-32x32.png'),
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: assetPath('/icon.svg'),
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: assetPath('/apple-icon.png'),
+    icon: { url: assetPath('/database-city-logo.png'), type: 'image/png' },
+    apple: assetPath('/database-city-logo.png'),
   },
 }
 
