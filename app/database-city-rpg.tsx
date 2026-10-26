@@ -997,10 +997,10 @@ export default function App() {
                                 }
                               }}
                               className={`w-full text-left p-3.5 rounded-xl border-3 text-base md:text-lg font-semibold transition-all shadow-[2px_2px_0px_#000] ${
-                                userSelectedOption === idx
-                                  ? idx === quizCorrectIndex
-                                    ? 'bg-[#22c55e] text-black border-white font-black'
-                                    : 'bg-rose-500 text-white border-white font-black'
+                                userSelectedOption !== null && idx === quizCorrectIndex
+                                  ? 'bg-[#22c55e] text-black border-white font-black'
+                                  : userSelectedOption === idx
+                                    ? 'bg-rose-500 text-white border-white font-black'
                                   : 'bg-slate-900 text-slate-100 border-slate-700 hover:border-[#38bdf8]'
                               }`}
                             >
@@ -1009,10 +1009,17 @@ export default function App() {
                           ))}
                         </div>
                         {userSelectedOption !== null && quizSuccess !== true && (
-                          <div className="flex items-center justify-between gap-3" aria-live="polite">
+                          <div className="flex flex-wrap items-center justify-between gap-3" aria-live="polite">
+                            <div className="min-w-0 flex-1">
                             <p className={`text-lg font-bold ${userSelectedOption === quizCorrectIndex ? 'text-green-400' : 'text-rose-400'}`}>
                               {userSelectedOption === quizCorrectIndex ? '✓ ตอบถูก' : '✗ ตอบผิด'}
                             </p>
+                            {userSelectedOption !== quizCorrectIndex && (
+                              <p className="mt-2 text-base font-bold text-green-400">
+                                เฉลย: {String.fromCharCode(65 + quizCorrectIndex)}. {quizOptions[quizCorrectIndex]}
+                              </p>
+                            )}
+                            </div>
                             <button
                               onClick={() => {
                                 if (quizRound === QUESTIONS_PER_LEVEL - 1) {
